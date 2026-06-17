@@ -1,0 +1,29 @@
+{
+  "technical_friction": {
+    "intervention_type": "chatbot",
+    "payload": {
+      "title": "Need help with specs?",
+      "message": "Our engineering team is online — ask anything.",
+      "cta": "Chat with an Engineer"
+    },
+    "confidence": 0.85
+  },
+  "price_hesitation": {
+    "intervention_type": "promo_banner",
+    "payload": {
+      "icon": "%",
+      "message": "Still deciding? Here's 10% off if you check out now.",
+      "discount_code": "STAY10"
+    },
+    "confidence": 0.78
+  },
+  "loyalty_recognition": {
+    "intervention_type": "loyalty_perk",
+    "payload": {
+      "icon": "★",
+      "message": "Welcome back! As a Gold member, enjoy free express shipping.",
+      "perk_code": "GOLDSHIP"
+    },
+    "confidence": 0.9
+  }
+}
