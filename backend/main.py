@@ -1,9 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from models import BehaviorPacket, InterventionPayload
+from models import BehaviorPacket, InterventionPayload, GenerateRequest
 from session_store import store
 from identity import resolve_identity
 from inference import infer_intent
+from generation import generate_all_persona_copies
 
 app = FastAPI(title="ChameleonPerks Backend")
 
@@ -21,10 +22,14 @@ def ingest(packet: BehaviorPacket):
     result = infer_intent(state, identity)
     return result
 
+@app.post("/generate")
+def generate_ads(req: GenerateRequest):
+    return generate_all_persona_copies(req.product)
+
 @app.get("/session/{session_id}")
 def debug_session(session_id: str):
     return store.get(session_id) or {}
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    return {"status": "ok"}

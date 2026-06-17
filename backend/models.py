@@ -15,3 +15,6 @@ class InterventionPayload(BaseModel):
     payload: Optional[dict] = None
     confidence: Optional[float] = None
     identity: Optional[dict] = None
+
+class GenerateRequest(BaseModel):
+    product: str
