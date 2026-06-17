@@ -1,0 +1,20 @@
+{
+  "cookie_abc123": {
+    "unified_id": "user_001",
+    "persona_tags": ["tech_enthusiast", "price_sensitive"],
+    "loyalty_tier": "silver",
+    "past_purchases": 3
+  },
+  "device_xyz789": {
+    "unified_id": "user_001",
+    "persona_tags": ["tech_enthusiast", "price_sensitive"],
+    "loyalty_tier": "silver",
+    "past_purchases": 3
+  },
+  "cookie_def456": {
+    "unified_id": "user_002",
+    "persona_tags": ["luxury_browser"],
+    "loyalty_tier": "gold",
+    "past_purchases": 12
+  }
+}
