@@ -1,0 +1,48 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from models import BehaviorPacket, InterventionPayload, GenerateRequest, OutreachRequest
+from session_store import store
+from identity import resolve_identity
+from inference import infer_intent
+from generation import generate_all_persona_copies, generate_outreach_message
+
+app = FastAPI(title="ChameleonPerks Backend")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.post("/ingest", response_model=InterventionPayload)
+def ingest(packet: BehaviorPacket):
+    state = store.update(packet.session_id, packet.dict())
+    identity = resolve_identity(state.get("identity_hint"))
+    result = infer_intent(state, identity)
+    return result
+
+@app.post("/generate")
+def generate_ads(req: GenerateRequest):
+    return generate_all_persona_copies(req.product)
+
+@app.post("/generate-outreach")
+def generate_outreach(req: OutreachRequest):
+    message = generate_outreach_message(
+        customer_name=req.customer_name,
+        product_desc=req.product_desc,
+        primary_label=req.primary_label,
+        primary_desc=req.primary_desc,
+        secondary_label=req.secondary_label,
+        secondary_desc=req.secondary_desc
+    )
+    return {"message": message}
+
+
+@app.get("/session/{session_id}")
+def debug_session(session_id: str):
+    return store.get(session_id) or {}
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}

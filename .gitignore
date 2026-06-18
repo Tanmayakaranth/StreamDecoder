@@ -1,0 +1,14 @@
+# Environment variables
+.env
+my-app/.env
+
+# Dependencies
+node_modules/
+
+# Python caching
+__pycache__/
+*.pyc
+
+# Logs
+*.log
+logs/
