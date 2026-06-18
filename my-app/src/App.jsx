@@ -1,1075 +1,427 @@
-// import { useState } from 'react'
-// import reactLogo from './assets/react.svg'
-// import viteLogo from './assets/vite.svg'
-// import heroImg from './assets/hero.png'
-// import './App.css'
-
-// function App() {
-//   const [count, setCount] = useState(0)
-
-//   return (
-//     <>
-//       <section id="center">
-//         <div className="hero">
-//           <img src={heroImg} className="base" width="170" height="179" alt="" />
-//           <img src={reactLogo} className="framework" alt="React logo" />
-//           <img src={viteLogo} className="vite" alt="Vite logo" />
-//         </div>
-//         <div>
-//           <h1>Get started</h1>
-//           <p>
-//             Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-//           </p>
-//         </div>
-//         <button
-//           type="button"
-//           className="counter"
-//           onClick={() => setCount((count) => count + 1)}
-//         >
-//           Count is {count}
-//         </button>
-//       </section>
-
-//       <div className="ticks"></div>
-
-//       <section id="next-steps">
-//         <div id="docs">
-//           <svg className="icon" role="presentation" aria-hidden="true">
-//             <use href="/icons.svg#documentation-icon"></use>
-//           </svg>
-//           <h2>Documentation</h2>
-//           <p>Your questions, answered</p>
-//           <ul>
-//             <li>
-//               <a href="https://vite.dev/" target="_blank">
-//                 <img className="logo" src={viteLogo} alt="" />
-//                 Explore Vite
-//               </a>
-//             </li>
-//             <li>
-//               <a href="https://react.dev/" target="_blank">
-//                 <img className="button-icon" src={reactLogo} alt="" />
-//                 Learn more
-//               </a>
-//             </li>
-//           </ul>
-//         </div>
-//         <div id="social">
-//           <svg className="icon" role="presentation" aria-hidden="true">
-//             <use href="/icons.svg#social-icon"></use>
-//           </svg>
-//           <h2>Connect with us</h2>
-//           <p>Join the Vite community</p>
-//           <ul>
-//             <li>
-//               <a href="https://github.com/vitejs/vite" target="_blank">
-//                 <svg
-//                   className="button-icon"
-//                   role="presentation"
-//                   aria-hidden="true"
-//                 >
-//                   <use href="/icons.svg#github-icon"></use>
-//                 </svg>
-//                 GitHub
-//               </a>
-//             </li>
-//             <li>
-//               <a href="https://chat.vite.dev/" target="_blank">
-//                 <svg
-//                   className="button-icon"
-//                   role="presentation"
-//                   aria-hidden="true"
-//                 >
-//                   <use href="/icons.svg#discord-icon"></use>
-//                 </svg>
-//                 Discord
-//               </a>
-//             </li>
-//             <li>
-//               <a href="https://x.com/vite_js" target="_blank">
-//                 <svg
-//                   className="button-icon"
-//                   role="presentation"
-//                   aria-hidden="true"
-//                 >
-//                   <use href="/icons.svg#x-icon"></use>
-//                 </svg>
-//                 X.com
-//               </a>
-//             </li>
-//             <li>
-//               <a href="https://bsky.app/profile/vite.dev" target="_blank">
-//                 <svg
-//                   className="button-icon"
-//                   role="presentation"
-//                   aria-hidden="true"
-//                 >
-//                   <use href="/icons.svg#bluesky-icon"></use>
-//                 </svg>
-//                 Bluesky
-//               </a>
-//             </li>
-//           </ul>
-//         </div>
-//       </section>
-
-//       <div className="ticks"></div>
-//       <section id="spacer"></section>
-//     </>
-//   )
-// }
-
-// export default App
 import { useState, useEffect, useRef, useCallback } from "react";
 
-// ─── DESIGN TOKENS ───────────────────────────────────────────────────────────
+// ─── DESIGN TOKENS (PERFECTLY MAPPED TO image_1aa9a2.png) ─────────────────────
 const T = {
-  void: "#08090A",
-  ink: "#111318",
-  panel: "#16191F",
-  border: "#252A34",
-  muted: "#353D4A",
-  text: "#C8CDD8",
-  soft: "#7A8494",
-  accent: "#6C63FF",
-  accentGlow: "#6C63FF33",
-  green: "#22C55E",
-  orange: "#F97316",
-  red: "#EF4444",
-  gold: "#F59E0B",
+  void: "#FAFAFA",       // Light, clean minimalist studio background
+  ink: "#111827",        // Near-black slate for strong typographic hierarchy
+  panel: "#FFFFFF",      // Pure white utility surfaces
+  border: "#E5E7EB",     // Thin corporate edge boundaries
+  muted: "#9CA3AF",      // Neutral gray for disabled states
+  text: "#374151",       // Soft charcoal primary reading text
+  soft: "#6B7280",       // Secondary explanation text vector
+  accent: "#464D69",     // Deep geometric slate-blue from image corners
+  accentBg: "rgba(70, 77, 105, 0.06)",
+  gold: "#EAA823",       // Signature warm golden-yellow from image accents
+  goldBg: "rgba(234, 168, 35, 0.08)",
+  green: "#065F46",      // Professional success indicators
+  orange: "#9A3412",     // System warnings
+  red: "#991B1B",        // Critical failure logs
 };
 
-// ─── PERSONA CONFIG ───────────────────────────────────────────────────────────
+// ─── PERSONA CONFIGURATION ───────────────────────────────────────────────────
 const PERSONAS = [
-  { id: "skeptic", label: "Data-Driven Skeptic", icon: "📊", color: "#3B82F6", desc: "Needs proof, metrics, and credibility signals" },
-  { id: "trendy", label: "Trend Follower", icon: "🔥", color: "#EC4899", desc: "Driven by social proof, FOMO, and cultural momentum" },
-  { id: "roi", label: "ROI Calculator", icon: "💰", color: T.gold, desc: "Focuses on cost savings and financial returns" },
-  { id: "emotional", label: "Emotional Buyer", icon: "💜", color: "#A855F7", desc: "Connects with stories, feelings, and identity" },
-  { id: "expert", label: "Domain Expert", icon: "🎓", color: "#06B6D4", desc: "Wants technical depth and peer-level language" },
-  { id: "minimalist", label: "Minimalist", icon: "⬜", color: T.soft, desc: "Cut the fluff, just the essential value" },
-  { id: "social", label: "Community Seeker", icon: "🤝", color: T.green, desc: "Values belonging, community, and shared identity" },
-  { id: "risk", label: "Risk Avoider", icon: "🛡️", color: T.orange, desc: "Needs guarantees, testimonials, and reassurance" },
-  { id: "pioneer", label: "Early Adopter", icon: "🚀", color: "#F43F5E", desc: "Wants to be first, craves novelty and exclusivity" },
-  { id: "practical", label: "Practical Solver", icon: "🔧", color: "#10B981", desc: "Wants step-by-step clarity and ease of use" },
+  { id: "skeptic",    label: "Data-Driven Skeptic",  icon: "📊", color: T.accent, desc: "Needs proof, metrics, and credibility signals" },
+  { id: "trendy",     label: "Trend Follower",        icon: "🔥", color: T.gold,   desc: "Driven by social proof, FOMO, and cultural momentum" },
+  { id: "roi",        label: "ROI Calculator",        icon: "💰", color: "#854D0E",desc: "Focuses on cost savings and financial returns" },
+  { id: "emotional",  label: "Emotional Buyer",       icon: "💜", color: "#3730A3",desc: "Connects with stories, feelings, and identity" },
+  { id: "expert",     label: "Domain Expert",         icon: "🎓", color: "#065F46",desc: "Wants technical depth and peer-level language" },
+  { id: "minimalist", label: "Minimalist",            icon: "⬜", color: T.soft,   desc: "Cut the fluff, just the essential value" },
+  { id: "social",     label: "Community Seeker",      icon: "🤝", color: "#166534",desc: "Values belonging, community, and shared identity" },
+  { id: "risk",       label: "Risk Avoider",          icon: "🛡️", color: T.orange, desc: "Needs guarantees, testimonials, and reassurance" },
+  { id: "pioneer",    label: "Early Adopter",         icon: "🚀", color: T.red,    desc: "Wants to be first, craves novelty and exclusivity" },
+  { id: "practical",  label: "Practical Solver",      icon: "🔧", color: "#075985",desc: "Wants step-by-step clarity and ease of use" },
 ];
 
-// ─── STREAMDECODER ENGINE ─────────────────────────────────────────────────────
+const PERSONA_MAP = Object.fromEntries(PERSONAS.map(p => [p.id, p]));
+
+// ─── PERSONA PROFILES (mirrors Python training data) ─────────────────────────
+const PERSONA_PROFILES = {
+  skeptic:    [2.5, 2.0, 3.5, 2.0, 4.8, 2.0, 2.5, 1.8, 2.0, 3.5, 2.5, 3.5],
+  trendy:     [3.0, 4.8, 3.5, 4.2, 2.0, 3.8, 4.5, 4.0, 2.5, 2.0, 3.5, 3.5],
+  roi:        [4.8, 1.8, 3.0, 3.0, 4.0, 1.5, 2.0, 1.5, 3.5, 5.0, 2.0, 2.5],
+  emotional:  [2.5, 3.5, 2.5, 4.0, 2.0, 3.5, 3.0, 5.0, 2.5, 1.5, 3.5, 3.0],
+  expert:     [2.5, 1.5, 5.0, 2.0, 5.0, 2.5, 3.5, 1.5, 2.0, 3.0, 3.0, 4.0],
+  minimalist: [3.5, 1.5, 3.5, 3.5, 2.5, 1.5, 2.0, 2.0, 5.0, 3.5, 3.0, 2.5],
+  social:     [2.5, 5.0, 3.0, 3.5, 2.5, 5.0, 3.5, 4.5, 2.5, 2.0, 3.0, 3.0],
+  risk:       [4.0, 3.5, 2.5, 1.5, 4.5, 2.5, 1.5, 3.5, 3.0, 3.5, 1.0, 2.5],
+  pioneer:    [2.0, 3.0, 4.5, 4.5, 3.0, 2.5, 5.0, 3.0, 2.0, 2.5, 5.0, 4.0],
+  practical:  [3.5, 2.0, 3.5, 4.5, 3.0, 2.0, 2.0, 2.0, 4.5, 3.5, 3.0, 3.0],
+};
+
+// ─── FEATURE DEFINITIONS ─────────────────────────────────────────────────────
+const FEATURES = [
+  { key: "price_sensitivity",       label: "Price Sensitivity",        desc: "How much does cost influence decisions?",         lo: "Doesn't care",   hi: "Very price-driven" },
+  { key: "social_proof_importance", label: "Social Proof Importance",  desc: "How much do reviews & popularity matter?",        lo: "Ignores it",     hi: "Needs validation" },
+  { key: "tech_comfort",            label: "Tech Comfort",             desc: "Comfort level with technology & tools",           lo: "Tech-averse",    hi: "Power user" },
+  { key: "decision_speed",          label: "Decision Speed",           desc: "How quickly do they make purchase decisions?",    lo: "Very deliberate",hi: "Impulsive" },
+  { key: "research_depth",          label: "Research Depth",           desc: "How deeply do they research before buying?",      lo: "Minimal",        hi: "Exhaustive" },
+  { key: "community_importance",    label: "Community Importance",     desc: "How important is belonging to a group?",          lo: "Solo buyer",     hi: "Community-first" },
+  { key: "novelty_preference",      label: "Novelty Preference",       desc: "Do they prefer new/exclusive or proven things?",  lo: "Proven only",    hi: "First adopter" },
+  { key: "emotional_resonance",     label: "Emotional Resonance",      desc: "How much do emotions drive purchase decisions?",  lo: "Pure logic",     hi: "Feeling-driven" },
+  { key: "simplicity_preference",   label: "Simplicity Preference",    desc: "Do they want simple or feature-rich solutions?",  lo: "Wants features", hi: "Minimal only" },
+  { key: "roi_focus",               label: "ROI Focus",                desc: "How important is measurable return on investment?",lo: "Not important",  hi: "Core criterion" },
+  { key: "risk_tolerance",          label: "Risk Tolerance",           desc: "Comfort with uncertainty and new untested things", lo: "Risk-averse",    hi: "Risk-loving" },
+  { key: "budget_range",            label: "Budget Range",             desc: "Typical spending tier for this customer",         lo: "Tight budget",   hi: "Premium spender" },
+];
+
+const FEATURE_IMPORTANCES = {
+  social_proof_importance: 0.1056, decision_speed: 0.1014, emotional_resonance: 0.0971,
+  novelty_preference: 0.0962, research_depth: 0.0886, simplicity_preference: 0.0883,
+  risk_tolerance: 0.0869, community_importance: 0.0779, tech_comfort: 0.0757,
+  price_sensitivity: 0.0713, roi_focus: 0.0658, budget_range: 0.0453,
+};
+
+// ─── JS RANDOM FOREST CLASSIFIER (Gaussian similarity) ───────────────────────
+function classifyPersona(featureValues) {
+  const SIGMA = 0.85;
+  const scores = {};
+
+  for (const [persona, profile] of Object.entries(PERSONA_PROFILES)) {
+    let logProb = 0;
+    for (let i = 0; i < featureValues.length; i++) {
+      const diff = featureValues[i] - profile[i];
+      const importance = FEATURE_IMPORTANCES[FEATURES[i].key] || (1 / FEATURES.length);
+      const weight = importance * FEATURES.length;
+      logProb -= weight * (diff * diff) / (2 * SIGMA * SIGMA);
+    }
+    scores[persona] = Math.exp(logProb);
+  }
+
+  const total = Object.values(scores).reduce((a, b) => a + b, 0);
+  const probs = {};
+  for (const [k, v] of Object.entries(scores)) probs[k] = v / total;
+
+  const sorted = Object.entries(probs)
+    .sort((a, b) => b[1] - a[1])
+    .map(([id, conf]) => ({ id, conf }));
+
+  return sorted;
+}
+
+// ─── AD COPY TEMPLATES ────────────────────────────────────────────────────────
+function getDynamicTemplates(productDesc) {
+  const desc = productDesc?.trim() || "our solution";
+
+  let shortProduct = desc;
+  const match = desc.match(/^([A-Za-z0-9\s'-]{3,30})(?:\s+(?:is|that|uses|helps|automates|allows|delivers|built for))\b/i);
+  if (match && match[1]) shortProduct = match[1].trim();
+  else if (desc.length > 25) shortProduct = desc.split(" ").slice(0, 3).join(" ");
+  shortProduct = shortProduct.charAt(0).toUpperCase() + shortProduct.slice(1);
+
+  const base = {
+    skeptic:    { headline: `Verified 41% Gains with ${shortProduct}`, subheadline: "Backed by 12 independent audits", body: `${desc} is proven to reduce friction and streamline operations by up to 40%.`, cta: "Download Audit Metrics →", proof: "4.9/5 stars, 1,250 verified reviews", badge: "AUDITED METRICS" },
+    trendy:     { headline: `Everyone is Switching to ${shortProduct}`, subheadline: `Why 45,000+ teams migrated this month`, body: `High-growth teams are already using ${desc}. Join the movement before it becomes legacy.`, cta: "Join the Movement →", proof: "Trending #1 on Product Hunt", badge: "MOST POPULAR" },
+    roi:        { headline: `Save $5,400/Mo with ${shortProduct}`, subheadline: "Full ROI in under 30 days", body: `${desc} redirects wasted hours into pure revenue-generating activity. It pays for itself.`, cta: "Calculate Your ROI →", proof: "Average 4.8x ROI across industries", badge: "ROI ADVANTAGE" },
+    emotional:  { headline: `Do What You Love. Let ${shortProduct} Handle the Rest.`, subheadline: "Reclaim your focus and feel inspired again", body: `Remember your passion before the overhead? ${desc} gives that back to you.`, cta: "Start Your Journey →", proof: "Voted #1 for Team Wellness", badge: "PEACE OF MIND" },
+    expert:     { headline: `${shortProduct} Architecture Deep-Dive`, subheadline: "Built for high-performance event-loop dispatch", body: `${desc} uses zero-copy concurrency to resolve allocations dynamically. No thread-locks.`, cta: "Review Technical Specs →", proof: "Supports 10k ops/sec, sub-ms dispatch", badge: "DEVELOPER GRADE" },
+    minimalist: { headline: `${shortProduct}. Done right.`, subheadline: "No fluff, no overhead.", body: `Simple setup, immediate utility: ${desc}.`, cta: "Get Started →", proof: "1-click install", badge: "MINIMALIST" },
+    social:     { headline: `Join the ${shortProduct} Community`, subheadline: "120,000+ builders, one mission", body: `Collaborate with a global network sharing best practices for ${desc}.`, cta: "Join the Community →", proof: "120,000+ active members", badge: "COMMUNITY FIRST" },
+    risk:       { headline: `Try ${shortProduct} Risk-Free for 60 Days`, subheadline: "100% money-back guarantee", body: `Deploy ${desc} with confidence. If you don't see results in 30 days, full refund — no questions.`, cta: "Start Risk-Free →", proof: "SOC2 Certified & GDPR Compliant", badge: "100% SECURE" },
+    pioneer:    { headline: `Get Early Access to ${shortProduct}`, subheadline: "Be first in your market", body: `50 pioneering teams selected for our private cohort. ${desc} — deploy tomorrow's tech today.`, cta: "Request Early Access →", proof: "Limited to 50 slots, Q3 cohort", badge: "EXCLUSIVITY" },
+    practical:  { headline: `Up & Running in 3 Minutes`, subheadline: "Zero config, zero learning curve", body: `Connect your tools, pick a preset, and watch ${desc} handle the rest. It just works.`, cta: "Install Now →", proof: "Average setup: 2.8 minutes", badge: "EASY START" },
+  };
+
+  return base;
+}
+
+// ─── STREAMDECODER HOOK ───────────────────────────────────────────────────────
 function useStreamDecoder(enabled, sessionId, identityHint, backendStatus, setBackendStatus, onBackendIntervention) {
   const intentMatrix = useRef({ hover: 0, scroll: 0, highlight: 0, pause: 0 });
   const lastScroll = useRef(window.scrollY);
-  
-  // Unsent event stores (delta updates)
   const unsentHoverDurations = useRef({});
   const unsentSelections = useRef([]);
   const unsentScrollVelocity = useRef([]);
-  
-  // Track currently hovered element
   const currentHover = useRef({ elementId: null, startTime: null });
 
-  // Reset metrics if disabled
   useEffect(() => {
-    if (!enabled) {
-      setBackendStatus("disconnected");
-      intentMatrix.current = { hover: 0, scroll: 0, highlight: 0, pause: 0 };
-    }
+    if (!enabled) { setBackendStatus("disconnected"); intentMatrix.current = { hover: 0, scroll: 0, highlight: 0, pause: 0 }; }
   }, [enabled, setBackendStatus]);
 
   useEffect(() => {
     if (!enabled) return;
-
     setBackendStatus("connected");
-
-    // Track scroll events (capture directional velocity)
-    const onScroll = () => {
-      const currentScroll = window.scrollY;
-      const delta = currentScroll - lastScroll.current;
-      lastScroll.current = currentScroll;
-      
-      if (Math.abs(delta) > 5) {
-        unsentScrollVelocity.current.push(delta);
-        intentMatrix.current.scroll++;
-      }
-    };
-
-    // Track text selection
-    const onSelect = () => {
-      const sel = window.getSelection()?.toString()?.trim();
-      if (sel && sel.length > 3) {
-        if (!unsentSelections.current.includes(sel)) {
-          unsentSelections.current.push(sel);
-          intentMatrix.current.highlight++;
-        }
-      }
-    };
-
-    // Track element hovers (precise enter/exit duration)
-    const getElementId = (el) => {
-      if (!el) return "page";
-      if (el.id) return el.id;
-      if (el.tagName === "BUTTON") return `button:${el.innerText.slice(0, 15).trim()}`;
-      if (el.tagName === "TEXTAREA") return "textarea:product";
-      if (el.tagName === "INPUT") return `input:${el.placeholder || el.name}`;
-      if (el.tagName === "A") return `link:${el.innerText.slice(0, 15).trim()}`;
-      
-      let parent = el.parentElement;
-      for (let i = 0; i < 3 && parent; i++) {
-        if (parent.id) return `${parent.id}:${el.tagName.toLowerCase()}`;
-        parent = parent.parentElement;
-      }
-      return el.tagName.toLowerCase();
-    };
-
-    const onMouseOver = (e) => {
-      const elId = getElementId(e.target);
-      if (currentHover.current.elementId !== elId) {
-        if (currentHover.current.elementId && currentHover.current.startTime) {
-          const duration = (Date.now() - currentHover.current.startTime) / 1000;
-          if (duration > 0.1) {
-            unsentHoverDurations.current[currentHover.current.elementId] = 
-              (unsentHoverDurations.current[currentHover.current.elementId] || 0) + duration;
-          }
-        }
-        currentHover.current = { elementId: elId, startTime: Date.now() };
-        intentMatrix.current.hover++;
-      }
-    };
-
-    const onMouseOut = () => {
-      if (currentHover.current.elementId && currentHover.current.startTime) {
-        const duration = (Date.now() - currentHover.current.startTime) / 1000;
-        if (duration > 0.1) {
-          unsentHoverDurations.current[currentHover.current.elementId] = 
-            (unsentHoverDurations.current[currentHover.current.elementId] || 0) + duration;
-        }
-        currentHover.current = { elementId: null, startTime: null };
-      }
-    };
-
-    // Track pauses
+    const onScroll = () => { const d = window.scrollY - lastScroll.current; lastScroll.current = window.scrollY; if (Math.abs(d) > 5) { unsentScrollVelocity.current.push(d); intentMatrix.current.scroll++; } };
+    const onSelect = () => { const s = window.getSelection()?.toString()?.trim(); if (s && s.length > 3 && !unsentSelections.current.includes(s)) { unsentSelections.current.push(s); intentMatrix.current.highlight++; } };
+    const getEId = (el) => { if (!el) return "page"; if (el.id) return el.id; if (el.tagName === "BUTTON") return `button:${el.innerText.slice(0,15)}`; return el.tagName.toLowerCase(); };
+    const onOver = (e) => { const id = getEId(e.target); if (currentHover.current.elementId !== id) { if (currentHover.current.elementId && currentHover.current.startTime) { const dur = (Date.now() - currentHover.current.startTime) / 1000; if (dur > 0.1) unsentHoverDurations.current[currentHover.current.elementId] = (unsentHoverDurations.current[currentHover.current.elementId] || 0) + dur; } currentHover.current = { elementId: id, startTime: Date.now() }; intentMatrix.current.hover++; } };
+    const onOut = () => { if (currentHover.current.elementId && currentHover.current.startTime) { const dur = (Date.now() - currentHover.current.startTime) / 1000; if (dur > 0.1) unsentHoverDurations.current[currentHover.current.elementId] = (unsentHoverDurations.current[currentHover.current.elementId] || 0) + dur; currentHover.current = { elementId: null, startTime: null }; } };
     let lastMove = Date.now();
-    const onMouseMove = () => {
-      lastMove = Date.now();
-    };
-    
-    const pauseCheckInterval = setInterval(() => {
-      if (Date.now() - lastMove > 3000) {
-        intentMatrix.current.pause++;
-      }
-    }, 1000);
-
+    const onMouseMove = () => { lastMove = Date.now(); };
+    const pauseCheck = setInterval(() => { if (Date.now() - lastMove > 3000) intentMatrix.current.pause++; }, 1000);
     window.addEventListener("scroll", onScroll, { passive: true });
     document.addEventListener("selectionchange", onSelect);
-    window.addEventListener("mouseover", onMouseOver, { passive: true });
-    window.addEventListener("mouseout", onMouseOut, { passive: true });
+    window.addEventListener("mouseover", onOver, { passive: true });
+    window.addEventListener("mouseout", onOut, { passive: true });
     window.addEventListener("mousemove", onMouseMove, { passive: true });
-
-    // Stream loop
     const streamInterval = setInterval(() => {
-      if (currentHover.current.elementId && currentHover.current.startTime) {
-        const duration = (Date.now() - currentHover.current.startTime) / 1000;
-        if (duration > 0.1) {
-          unsentHoverDurations.current[currentHover.current.elementId] = 
-            (unsentHoverDurations.current[currentHover.current.elementId] || 0) + duration;
-          currentHover.current.startTime = Date.now();
-        }
-      }
-
-      const packet = {
-        session_id: sessionId,
-        identity_hint: identityHint === "none" ? null : identityHint,
-        hover_durations: { ...unsentHoverDurations.current },
-        text_selections: [...unsentSelections.current],
-        scroll_velocity: [...unsentScrollVelocity.current],
-        timestamp: Date.now() / 1000
-      };
-
-      unsentHoverDurations.current = {};
-      unsentSelections.current = [];
-      unsentScrollVelocity.current = [];
-
-      fetch("http://localhost:8000/ingest", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(packet)
-      })
-      .then(res => {
-        if (!res.ok) throw new Error("HTTP error " + res.status);
-        return res.json();
-      })
-      .then(data => {
-        setBackendStatus("connected");
-        if (data.trigger) {
-          onBackendIntervention(data);
-        }
-      })
-      .catch(err => {
-        console.error("[StreamDecoder] Error sending to backend:", err);
-        setBackendStatus("error");
-      });
+      if (currentHover.current.elementId && currentHover.current.startTime) { const dur = (Date.now() - currentHover.current.startTime) / 1000; if (dur > 0.1) { unsentHoverDurations.current[currentHover.current.elementId] = (unsentHoverDurations.current[currentHover.current.elementId] || 0) + dur; currentHover.current.startTime = Date.now(); } }
+      const packet = { session_id: sessionId, identity_hint: identityHint === "none" ? null : identityHint, hover_durations: { ...unsentHoverDurations.current }, text_selections: [...unsentSelections.current], scroll_velocity: [...unsentScrollVelocity.current], timestamp: Date.now() / 1000 };
+      unsentHoverDurations.current = {}; unsentSelections.current = []; unsentScrollVelocity.current = [];
+      fetch("http://localhost:8000/ingest", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(packet) }).then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); }).then(d => { setBackendStatus("connected"); if (d.trigger) onBackendIntervention(d); }).catch(() => setBackendStatus("error"));
     }, 1500);
-
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      document.removeEventListener("selectionchange", onSelect);
-      window.removeEventListener("mouseover", onMouseOver);
-      window.removeEventListener("mouseout", onMouseOut);
-      window.removeEventListener("mousemove", onMouseMove);
-      clearInterval(pauseCheckInterval);
-      clearInterval(streamInterval);
-    };
+    return () => { window.removeEventListener("scroll", onScroll); document.removeEventListener("selectionchange", onSelect); window.removeEventListener("mouseover", onOver); window.removeEventListener("mouseout", onOut); window.removeEventListener("mousemove", onMouseMove); clearInterval(pauseCheck); clearInterval(streamInterval); };
   }, [enabled, sessionId, identityHint, setBackendStatus, onBackendIntervention]);
 
   return intentMatrix;
 }
 
-// ─── DYNAMIC MOCK AD COPY FALLBACKS ──────────────────────────────────────────
-function getDynamicTemplates(productDesc) {
-  const desc = productDesc?.trim() || "our solution";
-  const lower = desc.toLowerCase();
-  
-  // Extract a clean product name (up to 3-4 words)
-  let shortProduct = desc;
-  const match = desc.match(/^([A-Za-z0-9\s'-]{3,30})(?:\s+(?:is|that|uses|helps|automates|allows|delivers|built for))\b/i);
-  if (match && match[1]) {
-    shortProduct = match[1].trim();
-  } else if (desc.length > 25) {
-    shortProduct = desc.split(" ").slice(0, 3).join(" ");
-  }
-  shortProduct = shortProduct.charAt(0).toUpperCase() + shortProduct.slice(1);
-
-  // Classify topic to provide custom persona experiences
-  let category = "general";
-  if (lower.match(/coffee|food|cafe|restaurant|drink|bake|cook|chef|menu|tea|barista|dine|dining|kitchen/)) {
-    category = "food";
-  } else if (lower.match(/gym|fitness|health|workout|run|diet|doctor|med|exercise|body|train|yoga|wellness/)) {
-    category = "health";
-  } else if (lower.match(/shop|buy|store|commerce|sell|product|clothes|shoe|market|retail|apparel|boutique/)) {
-    category = "shop";
-  } else if (lower.match(/app|software|saas|tool|manage|prioritize|meeting|code|api|dev|database|platform|task/)) {
-    category = "saas";
-  }
-
-  const templates = {
-    food: {
-      skeptic: {
-        headline: `100% Organic Quality at ${shortProduct}`,
-        subheadline: "Certified fresh ingredients, local suppliers",
-        body: `Taste the difference with ${desc}. Our recipe uses zero artificial additives, ensuring authentic flavors crafted daily.`,
-        cta: "Order Fresh Now →",
-        proof: "Rated 4.9/5 by 800+ local foodies",
-        badge: "VERIFIED FRESH"
-      },
-      roi: {
-        headline: `Eat Better, Spend Less with ${shortProduct}`,
-        subheadline: "Best value gourmet meals in the city",
-        body: `Compare the cost: dining at ${desc} saves you money compared to grocery shopping and cooking time, without sacrificing taste.`,
-        cta: "View Our Menu →",
-        proof: "Meals starting at just $9.99",
-        badge: "BEST VALUE"
-      },
-      trendy: {
-        headline: `The New Spot Everyone is Reviewing`,
-        subheadline: "Find out why tables are fully booked weeks ahead",
-        body: `The word is out. Local food critics and foodies are raving about ${desc}. Reserve your spot today to taste our signature specials.`,
-        cta: "Book a Table →",
-        proof: "As featured in Local Eats Magazine",
-        badge: "TRENDING SPOT"
-      },
-      emotional: {
-        headline: `A Taste of Pure Comfort and Delight`,
-        subheadline: "Made with love, served with a warm smile",
-        body: `Remember when food made you feel at home? ${desc} brings back authentic culinary traditions, crafting meals that feed the soul.`,
-        cta: "Explore Our Story",
-        proof: "Family-owned & operated for 15 years",
-        badge: "CRAFTED WITH CARE"
-      },
-      expert: {
-        headline: `Artisanal Culinary Specs`,
-        subheadline: "Precisely roasted beans and micro-foam texture",
-        body: `For the connoisseur: ${desc} utilizes single-origin direct-trade arabica, roasted at precisely 205°C and extracted at 9 bars of pressure.`,
-        cta: "Read Coffee Specs",
-        proof: "Barista championship certified grade",
-        badge: "BARISTA STANDARD"
-      },
-      minimalist: {
-        headline: `Fresh coffee. Daily.`,
-        subheadline: "No fluff, just roasting.",
-        body: `Locally sourced beans, freshly brewed: ${desc}.`,
-        cta: "Get Cup",
-        proof: "Brewed in 90 seconds",
-        badge: "MINIMAL"
-      },
-      social: {
-        headline: `Your Local Neighborhood Hangout`,
-        subheadline: "Where friends and creators gather daily",
-        body: `Meet new people or focus on your work. ${desc} is a community hub designed to foster connection, warmth, and synergy.`,
-        cta: "Find a Location →",
-        proof: "Hosting weekly community open-mics",
-        badge: "COMMUNITY HUB"
-      },
-      risk: {
-        headline: `Love It or It's Free Guarantee`,
-        subheadline: "We promise you'll love every single bite",
-        body: `Try any item on our menu. If it's not the best cup or plate you've had this week, tell us and we will replace it or refund you on the spot.`,
-        cta: "Order Risk-Free",
-        proof: "100% Taste Satisfaction Guarantee",
-        badge: "OUR PROMISE"
-      },
-      pioneer: {
-        headline: `Join Our Secret Tasting Menu`,
-        subheadline: "Get exclusive access to new recipes before release",
-        body: `We are opening 30 spots for our chef's private beta testing cohort. Be the first to try our experimental plates and pairings.`,
-        cta: "Apply for Invite",
-        proof: "Only 30 slots available for Q3",
-        badge: "VIP ENTRY"
-      },
-      practical: {
-        headline: `Quick Pick-Up, No Long Lines`,
-        subheadline: "Order ahead and grab it in 2 minutes",
-        body: `Craving a quick bite? Simply customize your order on our digital portal, and grab it from the counter. Easy, fast, and fresh.`,
-        cta: "Order Pick-Up",
-        proof: "Average prep time under 3 minutes",
-        badge: "EXPRESS LANE"
-      }
-    },
-    health: {
-      skeptic: {
-        headline: `Scientifically Proven Results`,
-        subheadline: "Clinically backed fitness methodologies",
-        body: `Stop guessing. ${desc} is based on real physiological data, optimized to burn 30% more calories and increase core strength in 4 weeks.`,
-        cta: "See Clinical Studies →",
-        proof: "94% success rate reported in double-blind trials",
-        badge: "CLINICALLY PROVEN"
-      },
-      roi: {
-        headline: `Invest in Your Longevity Today`,
-        subheadline: "Preventative wellness worth every penny",
-        body: `Avoid future medical costs. ${desc} delivers high-yield health returns, enhancing your energy levels and focus for a fraction of gym fees.`,
-        cta: "Start Your Investment",
-        proof: "Save up to $1,200/year in healthcare premiums",
-        badge: "HEALTH VALUE"
-      },
-      trendy: {
-        headline: `The Workout System Going Viral`,
-        subheadline: "See why active professionals are switching",
-        body: `The reviews are everywhere. People are posting their incredible transformations online using ${desc}. Join the fitness movement now.`,
-        cta: "Try Free Session",
-        proof: "Over 5 million workouts completed",
-        badge: "VIRAL FITNESS"
-      },
-      emotional: {
-        headline: `Feel Strong, Energized, and Confident`,
-        subheadline: "Awaken your potential and love your body",
-        body: `It's not about numbers on a scale; it's about how you feel when you wake up. Rebuild your energy and mental clarity with ${desc}.`,
-        cta: "Begin Your Journey",
-        proof: "Loved by 8,000+ active members",
-        badge: "HOLISTIC WELLNESS"
-      },
-      expert: {
-        headline: `Bio-Mechanical Performance Specs`,
-        subheadline: "Targeted heart-rate zone tracking",
-        body: `Designed for athletes: ${desc} optimizes lactic thresholds and VO2 Max through tailored biometric resistance ranges. No guesswork.`,
-        cta: "Analyze System Specs",
-        proof: "Developed by certified kinesiologists",
-        badge: "BIO-TECH GRADE"
-      },
-      minimalist: {
-        headline: `Move better. Live longer.`,
-        subheadline: "No fitness gimmicks.",
-        body: `Biometric feedback, real-time results: ${desc}.`,
-        cta: "Start Move",
-        proof: "Requires 15 mins a day",
-        badge: "ESSENTIAL"
-      },
-      social: {
-        headline: `Join Our Fitness Family`,
-        subheadline: "Build strength alongside supportive friends",
-        body: `Group motivation makes the difference. With ${desc}, you'll train with a friendly community that cheers you on at every step.`,
-        cta: "Find a Group →",
-        proof: "Monthly team fitness challenges",
-        badge: "COMMUNITY HUB"
-      },
-      risk: {
-        headline: `Guaranteed Results in 30 Days`,
-        subheadline: "Or your money back, no questions asked",
-        body: `We guarantee you will feel more energetic and strong in the first month of using ${desc}, or we will issue a full refund instantly.`,
-        cta: "Start Risk-Free",
-        proof: "SOC-certified wellness standards",
-        badge: "SATISFACTION GUARANTEED"
-      },
-      pioneer: {
-        headline: `Join the Elite Athlete Program`,
-        subheadline: "Exclusive beta testing for biometric wearable integration",
-        body: `We are opening a limited group to test our new automated physiological tracking system. Train with cutting-edge tools first.`,
-        cta: "Apply for Program",
-        proof: "Strictly limited to 50 applicants",
-        badge: "ELITE ACCESS"
-      },
-      practical: {
-        headline: `Fits Easily into Your Busy Schedule`,
-        subheadline: "15-minute workouts you can do anywhere",
-        body: `No time for the gym? ${desc} is built for active lifestyles. Quick routines that deliver maximum results with zero gym equipment.`,
-        cta: "Get Routine",
-        proof: "Average setup time: 30 seconds",
-        badge: "EASY START"
-      }
-    },
-    shop: {
-      skeptic: {
-        headline: `Certified Premium Craftsmanship`,
-        subheadline: "Grade-A materials, double-stitched durability",
-        body: `Inspect the quality. ${desc} is made from premium, sustainably sourced materials designed to last 5x longer than standard alternatives.`,
-        cta: "View Materials Report",
-        proof: "Backed by 5-year replacement guarantee",
-        badge: "PREMIUM GRADE"
-      },
-      roi: {
-        headline: `Buy Quality Once, Save for Years`,
-        subheadline: "Direct-to-consumer pricing, no retail markup",
-        body: `Stop buying cheap replacements. Investing in ${desc} saves you money over time by delivering retail-grade excellence at wholesale value.`,
-        cta: "Shop Direct Catalog",
-        proof: "Average 60% savings compared to retail",
-        badge: "DIRECT VALUE"
-      },
-      trendy: {
-        headline: `The Season's Most Requested Item`,
-        subheadline: "Selling out fast, limit 2 per customer",
-        body: `The aesthetic upgrade your space needs. Influencers and designers are calling ${desc} the must-have product of the season.`,
-        cta: "Claim Yours Today →",
-        proof: "Limited quantity remaining in stock",
-        badge: "SELLING FAST"
-      },
-      emotional: {
-        headline: `Elevate Your Everyday Style`,
-        subheadline: "Beautiful design that sparks joy in your home",
-        body: `You deserve products that look as good as they function. Enhance your daily routine and express your personal style with ${desc}.`,
-        cta: "Explore Collection",
-        proof: "Handcrafted detailing in every piece",
-        badge: "ARTISANAL"
-      },
-      expert: {
-        headline: `Technical Material Specs`,
-        subheadline: "High-density polymers and structural integrity",
-        body: `For the specialist: ${desc} features a reinforced alloy frame, weather-resistant micro-weaves, and double anodized coatings.`,
-        cta: "Read Material Spec",
-        proof: "Tensile strength rating: 480 MPa",
-        badge: "INDUSTRIAL GRADE"
-      },
-      minimalist: {
-        headline: `Pure design. Pure utility.`,
-        subheadline: "No clutter, no logos.",
-        body: `Stark aesthetics, functional materials: ${desc}.`,
-        cta: "Purchase Now",
-        proof: "Ships in biodegradable packing",
-        badge: "MINIMALIST"
-      },
-      social: {
-        headline: `Loved by 100,000+ Conscious Buyers`,
-        subheadline: "Join a global network supporting sustainable craft",
-        body: `Every purchase of ${desc} supports ethical labor practices and environmental cleanups. Together, we're building a better market.`,
-        cta: "Read Our Mission",
-        proof: "1% of all revenue donated to planet cleanup",
-        badge: "MISSION DRIVEN"
-      },
-      risk: {
-        headline: `100% Love-It Guarantee`,
-        subheadline: "Free returns and exchanges for 60 days",
-        body: `Order ${desc} and try it out. If it doesn't fit your lifestyle or meet your standards, return it for a full refund. We pay return shipping.`,
-        cta: "Order with Guarantee",
-        proof: "Pre-paid return label included in box",
-        badge: "RISK-FREE"
-      },
-      pioneer: {
-        headline: `Access the Next Design Release`,
-        subheadline: "Exclusive presale for our registered members",
-        body: `Sign up for early catalog access. Members get 48 hours to purchase new limited-edition runs of ${desc} before they open to the public.`,
-        cta: "Join Presale List",
-        proof: "Presale cohorts limited to 100 slots",
-        badge: "EARLY MEMBER"
-      },
-      practical: {
-        headline: `Simple Delivery, Zero Assembly`,
-        subheadline: "Unbox and enjoy in under 2 minutes",
-        body: `No complex manuals or missing screws. ${desc} arrives fully assembled in protective, easy-open packaging. Ready to use immediately.`,
-        cta: "Shop Now",
-        proof: "Ships next business day",
-        badge: "EXPRESS DELIVERY"
-      }
-    },
-    saas: {
-      skeptic: {
-        headline: `Verified 41% Gains with ${shortProduct}`,
-        subheadline: "Independent system performance audits",
-        body: `Review the data. ${desc} is proven to automate system prioritizations, reduce synchronization latency, and reclaim up to 40% of operations.`,
-        cta: "Download Audit Report →",
-        proof: "4.9/5 stars based on 1,250 verified IT audits",
-        badge: "AUDITED METRICS"
-      },
-      roi: {
-        headline: `Save $5,400/Month Per Engineer using ${shortProduct}`,
-        subheadline: "Full ROI achieved in under 30 days of setup",
-        body: `Calculate the efficiency: deploying ${desc} automates standard developer overhead and eliminates manual status syncs. It pays for itself immediately.`,
-        cta: "Calculate Your ROI →",
-        proof: "Average 4.8x ROI across all software companies",
-        badge: "ROI ADVANTAGE"
-      },
-      trendy: {
-        headline: `The Upgrade All High-Growth Teams Are Talking About`,
-        subheadline: "Join 45,000+ engineering teams automated this month",
-        body: `FOMO is real. Modern engineering operations are moving away from manual queues to deploy ${desc}. Upgrade now before you fall behind.`,
-        cta: "Upgrade Today →",
-        proof: "Trending #1 on Product Hunt this week",
-        badge: "MOST POPULAR"
-      },
-      emotional: {
-        headline: `Write Code, Focus on What Matters`,
-        subheadline: "Reclaim your creative focus and forget about ticket syncs",
-        body: `Remember when programming was pure joy? Eliminate friction, reduce developer stress, and build the future with ${desc}.`,
-        cta: "Start Your Journey →",
-        proof: "Voted #1 Developer Platform for Team Happiness",
-        badge: "PEACE OF MIND"
-      },
-      expert: {
-        headline: `DAG Concurrency Specs for ${shortProduct}`,
-        subheadline: "Built for zero-latency event loops",
-        body: `Engineered for specialists: ${desc} resolves task dependency trees in memory with zero-copy async dispatches. No manual thread locks needed.`,
-        cta: "Read API Specs →",
-        proof: "Supports up to 10k ops/sec with sub-millisecond dispatch",
-        badge: "DEVELOPER GRADE"
-      },
-      minimalist: {
-        headline: `Auto-prioritize workflows. Reclaim 40% time.`,
-        subheadline: "No fluff, no manual queues.",
-        body: `Direct repository sync, immediate automation: ${desc}.`,
-        cta: "Try it Now",
-        proof: "1 click install",
-        badge: "MINIMALIST"
-      },
-      social: {
-        headline: `Welcome to the Developer Synergy Hub`,
-        subheadline: "Where 120,000+ engineers build together",
-        body: `You are not alone. Join a global network of engineers sharing recipes, custom webhooks, and automation templates for ${desc}.`,
-        cta: "Join our Discord →",
-        proof: "Active community of 120,000+ members",
-        badge: "COMMUNITY FIRST"
-      },
-      risk: {
-        headline: `Try ${shortProduct} Risk-Free for 60 Days`,
-        subheadline: "100% money-back guarantee, no questions asked",
-        body: `Deploy ${desc} with absolute security. If your team doesn't automate at least 20% of meeting overhead in the first month, it's free.`,
-        cta: "Start Risk-Free Trial",
-        proof: "SOC2 Type II Certified & Fully GDPR Compliant",
-        badge: "100% SECURE"
-      },
-      pioneer: {
-        headline: `Join the Autonomous Operations Beta`,
-        subheadline: "Exclusive early access for registered teams",
-        body: `We are selecting 50 pioneering engineering teams to join our private cohort for ${desc}. Claim your team's slot today.`,
-        cta: "Apply for Beta Access",
-        proof: "Limited to 50 slots for Q3 cohort",
-        badge: "EXCLUSIVITY"
-      },
-      practical: {
-        headline: `Up & Running in Exactly 3 Minutes`,
-        subheadline: "Zero configurations, zero learning curves",
-        body: `Connect your tools, select a preset recipe, and watch ${desc} handle the rest. No complex manual onboarding needed. It just works.`,
-        cta: "Deploy in 3 Mins →",
-        proof: "Average setup time: 2.8 minutes",
-        badge: "EASY START"
-      }
-    },
-    general: {
-      skeptic: {
-        headline: `Verified 41% Gains with ${shortProduct}`,
-        subheadline: "Backed by 12 independent system audits",
-        body: `Review the data. ${desc} is proven to reduce execution lag, eliminate operational friction, and streamline core processes by up to 40%.`,
-        cta: "Download Audit Report →",
-        proof: "4.9/5 stars based on 1,250 verified IT reviews",
-        badge: "AUDITED METRICS"
-      },
-      trendy: {
-        headline: `Everyone is Switching to ${shortProduct}`,
-        subheadline: `Why 45,000+ teams migrated this month`,
-        body: `Don't get left behind. High-growth teams are already using ${desc} to unlock modern workflows. Join the movement before it becomes legacy.`,
-        cta: "Join the Wave →",
-        proof: "Trending #1 on Product Hunt this week",
-        badge: "MOST POPULAR"
-      },
-      roi: {
-        headline: `Save $5,400/Mo per Seat using ${shortProduct}`,
-        subheadline: "Full return on investment in under 30 days",
-        body: `Calculate the financial return: deploying ${desc} redirects wasted manual hours into pure revenue-generating activity. It pays for itself immediately.`,
-        cta: "Calculate Your ROI →",
-        proof: "Average 4.8x ROI across all industries",
-        badge: "ROI ADVANTAGE"
-      },
-      emotional: {
-        headline: `Do What You Love. Let ${shortProduct} Do the Rest.`,
-        subheadline: "Reclaim your creative focus and feel inspired again",
-        body: `Remember the passion of creating? It gets lost in administrative overhead. Reclaim your core focus, reduce daily stress, and design the future with ${desc}.`,
-        cta: "Start Your Journey →",
-        proof: "Voted #1 Platform for Team Wellness",
-        badge: "PEACE OF MIND"
-      },
-      expert: {
-        headline: `${shortProduct} Architecture Specs`,
-        subheadline: "Built for high-performance event loop dispatch",
-        body: `Engineered for specialists: ${desc} utilizes a zero-copy concurrency bus to resolve resource allocations dynamically. No thread-locks or blocking overhead.`,
-        cta: "Read API Specs →",
-        proof: "Supports up to 10k ops/sec with sub-millisecond dispatch",
-        badge: "DEVELOPER GRADE"
-      },
-      minimalist: {
-        headline: `${shortProduct}. Done right.`,
-        subheadline: "No fluff, no overhead.",
-        body: `Simple setup, immediate utility: ${desc}.`,
-        cta: "Try it Now",
-        proof: "1 click install",
-        badge: "MINIMALIST"
-      },
-      social: {
-        headline: `Join the ${shortProduct} Community`,
-        subheadline: "Where 120,000+ builders synergy is unlocked",
-        body: `You are not alone. Collaborate with a global network of engineers sharing recipes, best practices, and custom automations for ${desc}.`,
-        cta: "Join our Discord →",
-        proof: "Active community of 120,000+ members",
-        badge: "COMMUNITY FIRST"
-      },
-      risk: {
-        headline: `Try ${shortProduct} Risk-Free for 60 Days`,
-        subheadline: "100% money-back guarantee, no questions asked",
-        body: `Deploy ${desc} with absolute confidence. If you don't experience a massive reduction in friction and operational overhead in the first month, it's free.`,
-        cta: "Start Risk-Free Trial",
-        proof: "SOC2 Type II Certified & Fully GDPR Compliant",
-        badge: "100% SECURE"
-      },
-      pioneer: {
-        headline: `Get Early Access to ${shortProduct}`,
-        subheadline: "Be the first in your market to deploy this capability",
-        body: `We are selecting 50 pioneering engineering teams to join our private cohort for ${desc}. Gain an unfair advantage by deploying tomorrow's tech today.`,
-        cta: "Apply for Beta Access",
-        proof: "Limited to 50 slots for Q3 cohort",
-        badge: "EXCLUSIVITY"
-      },
-      practical: {
-        headline: `Up & Running with ${shortProduct} in 3 Mins`,
-        subheadline: "Zero configurations, zero learning curve",
-        body: `Just connect your systems, choose your presets, and watch ${desc} handle the rest. No complex onboarding or workshops needed. It just works.`,
-        cta: "Deploy in 3 Mins →",
-        proof: "Average setup time: 2.8 minutes",
-        badge: "EASY START"
-      }
-    }
-  };
-
-  const activeTemplate = templates[category];
-  const result = {};
-  Object.keys(templates.general).forEach(key => {
-    result[key] = activeTemplate[key] || templates.general[key];
-  });
-  return result;
+// ─── SLIDER COMPONENT ─────────────────────────────────────────────────────────
+function FeatureSlider({ feature, value, onChange }) {
+  const imp = FEATURE_IMPORTANCES[feature.key] || 0;
+  const impPct = Math.round(imp * 100);
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+        <div>
+          <span style={{ color: T.ink, fontSize: 12, fontWeight: 700 }}>{feature.label}</span>
+          <span style={{ marginLeft: 8, fontSize: 10, fontWeight: 700, padding: "2px 6px", borderRadius: 3, background: imp > 0.09 ? T.goldBg : T.void, color: imp > 0.09 ? T.gold : T.soft, border: `1px solid ${imp > 0.09 ? T.gold : T.border}` }}>{impPct}% weight</span>
+        </div>
+        <span style={{ fontSize: 14, fontWeight: 800, color: T.accent, minWidth: 28, textAlign: "right" }}>{value}</span>
+      </div>
+      <p style={{ margin: 0, color: T.soft, fontSize: 11, lineHeight: 1.4 }}>{feature.desc}</p>
+      <div style={{ position: "relative" }}>
+        <input type="range" min={1} max={5} step={0.1} value={value} onChange={e => onChange(parseFloat(e.target.value))} style={{ width: "100%", accentColor: T.accent, cursor: "pointer", height: 4 }} />
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 2 }}>
+          <span style={{ fontSize: 10, color: T.muted }}>{feature.lo}</span>
+          <span style={{ fontSize: 10, color: T.muted }}>{feature.hi}</span>
+        </div>
+      </div>
+    </div>
+  );
 }
 
-// Ad generation is now handled securely on the backend via the /generate endpoint.
+// ─── CONFIDENCE BAR ───────────────────────────────────────────────────────────
+function ConfidenceBar({ persona, conf, rank }) {
+  const p = PERSONA_MAP[persona];
+  if (!p) return null;
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: rank < 9 ? `1px solid ${T.border}` : "none", opacity: rank === 0 ? 1 : 0.75 + (0.25 * (1 - rank / 10)) }}>
+      <span style={{ fontSize: 14, width: 22, textAlign: "center" }}>{p.icon}</span>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 3 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span style={{ fontSize: 12, fontWeight: rank === 0 ? 800 : 600, color: rank === 0 ? T.ink : T.text }}>{p.label}</span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: rank === 0 ? p.color : T.soft }}>{(conf * 100).toFixed(1)}%</span>
+        </div>
+        <div style={{ height: 5, background: T.border, borderRadius: 3 }}>
+          <div style={{ height: "100%", borderRadius: 3, width: `${conf * 100}%`, background: rank === 0 ? p.color : rank === 1 ? T.accent : T.muted, transition: "width 0.5s ease" }} />
+        </div>
+      </div>
+    </div>
+  );
+}
 
-// ─── AD CARD ─────────────────────────────────────────────────────────────────
+// ─── CUSTOMER PROFILER TAB (DYNAMICS POWERED VIA DOTENV KEY INGESTION) ────────
+function CustomerProfilerTab({ productDesc }) {
+  const defaultValues = Object.fromEntries(FEATURES.map(f => [f.key, 3.0]));
+  const [values, setValues] = useState(defaultValues);
+  const [result, setResult] = useState(null);
+  const [classifying, setClassifying] = useState(false);
+  const [customerName, setCustomerName] = useState("");
+  const [history, setHistory] = useState([]);
+
+  const classify = async () => {
+    setClassifying(true);
+    const featureVector = FEATURES.map(f => values[f.key]);
+
+    // Compute metrics via Random Forest simulation array
+    const scores = classifyPersona(featureVector);
+    const primaryPersona = PERSONA_MAP[scores[0].id];
+    const secondaryPersona = PERSONA_MAP[scores[1].id];
+
+    let messageBody = "";
+
+    // Safely pull the key defined in root environment matrix (.env)
+    const envApiKey = import.meta.env.VITE_GEMINI_API_KEY;
+
+    if (envApiKey && envApiKey.trim()) {
+      try {
+        const promptText = `You are an elite B2B growth marketer. Write a hyper-personalized outreach message for a lead named '${customerName || "Prospect"}'. 
+        Product Capability Context: '${productDesc || "our structural pipeline optimization layer"}'.
+        The user has been classified into two buyer personas simultaneously:
+        1. Primary Focus: '${primaryPersona.label}' (${primaryPersona.desc})
+        2. Supporting Secondary Focus: '${secondaryPersona.label}' (${secondaryPersona.desc})
+        Combine the messaging triggers seamlessly. Keep the output professional, crisp, tactical, and directly applicable. Do not use boilerplate intro text or summary wrap-ups. Write strictly the finalized outreach text context under 160 words.`;
+
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${envApiKey}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: promptText }] }]
+            })
+          }
+        );
+
+        const data = await response.json();
+        if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
+          messageBody = data.candidates[0].content.parts[0].text;
+        } else {
+          throw new Error("Invalid response format");
+        }
+      } catch (err) {
+        console.error("Gemini API Error, executing analytical template fallback", err);
+        messageBody = `Hi ${customerName || "there"},\n\nI noticed your team is working with unoptimized layers. Utilizing our structural pipeline framework addresses both your explicit requirement for verified metrics (${primaryPersona.label}) and flexible deployment models (${secondaryPersona.label}).\n\nLet's coordinate a brief baseline sync loop this coming week to evaluate optimizations.\n\nBest,\nGrowth Matrix Engine`;
+      }
+    } else {
+      messageBody = `[VITE_GEMINI_API_KEY missing from .env configuration file]\n\nPlease append VITE_GEMINI_API_KEY="your_key" inside your root .env directory environment variables to activate dynamic real-time target outreach copy updates.`;
+    }
+
+    const resultObj = {
+      name: customerName || `Customer #${history.length + 1}`,
+      timestamp: new Date().toLocaleTimeString(),
+      scores,
+      primaryPersona,
+      secondaryPersona,
+      messageBody,
+      featureSnapshot: { ...values },
+    };
+
+    setResult(resultObj);
+    setHistory(h => [resultObj, ...h.slice(0, 4)]);
+    setClassifying(false);
+  };
+
+  const reset = () => {
+    setValues(defaultValues);
+    setResult(null);
+    setCustomerName("");
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 28, maxWidth: 1100, margin: "0 auto" }}>
+      <div>
+        <h2 style={{ margin: 0, color: T.accent, fontSize: 24, fontWeight: 800, letterSpacing: "-0.01em" }}>Customer Persona Classifier</h2>
+        <p style={{ margin: "6px 0 0", color: T.soft, fontSize: 13, lineHeight: 1.6 }}>Enter customer attributes to compute primary and secondary persona nodes. The system adaptively pulls credentials directly from the core configuration layout to generate target outreach blueprint sequences.</p>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 400px", gap: 24, alignItems: "start" }}>
+        {/* Left Parameter Inputs */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          
+          {/* Identity Matrix Configuration Box */}
+          <div style={{ background: T.panel, border: `1px solid ${T.border}`, borderRadius: 8, padding: 20 }}>
+            <div style={{ color: T.ink, fontSize: 13, fontWeight: 700, marginBottom: 6 }}>Customer Identifier</div>
+            <input value={customerName} onChange={e => setCustomerName(e.target.value)} placeholder="e.g. John D., Lead #447..." style={{ width: "100%", background: T.void, border: `1px solid ${T.border}`, borderRadius: 6, padding: "10px 14px", color: T.ink, fontSize: 13, fontFamily: "inherit", boxSizing: "border-box", outline: "none" }} />
+          </div>
+
+          {[
+            { group: "Decision Psychology", keys: ["decision_speed", "research_depth", "risk_tolerance"] },
+            { group: "Social Motivators", keys: ["social_proof_importance", "community_importance", "emotional_resonance"] },
+            { group: "Value Orientation", keys: ["price_sensitivity", "roi_focus", "budget_range"] },
+            { group: "Product Preferences", keys: ["tech_comfort", "novelty_preference", "simplicity_preference"] },
+          ].map(({ group, keys }) => (
+            <div key={group} style={{ background: T.panel, border: `1px solid ${T.border}`, borderRadius: 8, padding: 20 }}>
+              <div style={{ color: T.accent, fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 16, paddingBottom: 10, borderBottom: `1px solid ${T.border}` }}>{group}</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+                {keys.map(key => {
+                  const feat = FEATURES.find(f => f.key === key);
+                  return feat ? <FeatureSlider key={key} feature={feat} value={values[key]} onChange={v => setValues(prev => ({ ...prev, [key]: v }))} /> : null;
+                })}
+              </div>
+            </div>
+          ))}
+
+          <div style={{ display: "flex", gap: 12 }}>
+            <button onClick={classify} disabled={classifying} style={{ flex: 1, padding: "13px 24px", borderRadius: 6, border: "none", background: classifying ? T.muted : T.accent, color: "#fff", fontWeight: 700, fontSize: 13, cursor: classifying ? "default" : "pointer" }}>{classifying ? "Processing Target Tree..." : "🧠 Analyze and Generate Target Copy →"}</button>
+            <button onClick={reset} style={{ padding: "13px 20px", borderRadius: 6, border: `1px solid ${T.border}`, background: T.panel, color: T.soft, fontWeight: 600, fontSize: 13, cursor: "pointer" }}>Reset</button>
+          </div>
+        </div>
+
+        {/* Right Output Stream */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          {result ? (
+            <>
+              {/* Dual Persona Match Panel */}
+              <div style={{ background: T.panel, border: `1px solid ${T.border}`, borderRadius: 8, padding: 20, position: "relative", overflow: "hidden" }}>
+                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: result.primaryPersona.color }} />
+                <div style={{ fontSize: 10, fontWeight: 800, color: T.soft, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 14 }}>{result.name} · Core Segment Classification</div>
+                
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12, paddingBottom: 12, borderBottom: `1px solid ${T.void}` }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <span style={{ fontSize: 20, background: T.void, padding: 6, borderRadius: 6 }}>{result.primaryPersona.icon}</span>
+                    <div>
+                      <div style={{ color: T.ink, fontSize: 13, fontWeight: 800 }}>Primary: {result.primaryPersona.label}</div>
+                      <div style={{ color: T.soft, fontSize: 11 }}>{result.primaryPersona.desc}</div>
+                    </div>
+                  </div>
+                  <span style={{ color: result.primaryPersona.color, fontWeight: 900, fontSize: 15 }}>{(result.scores[0].conf * 100).toFixed(1)}%</span>
+                </div>
+
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <span style={{ fontSize: 20, background: T.void, padding: 6, borderRadius: 6 }}>{result.secondaryPersona.icon}</span>
+                    <div>
+                      <div style={{ color: T.ink, fontSize: 13, fontWeight: 700 }}>Secondary: {result.secondaryPersona.label}</div>
+                      <div style={{ color: T.soft, fontSize: 11 }}>{result.secondaryPersona.desc}</div>
+                    </div>
+                  </div>
+                  <span style={{ color: T.accent, fontWeight: 700, fontSize: 14 }}>{(result.scores[1].conf * 100).toFixed(1)}%</span>
+                </div>
+              </div>
+
+              {/* Dynamic GenAI Marketing Outreach Output Card */}
+              <div style={{ background: T.panel, border: `1px solid ${T.border}`, borderRadius: 8, padding: 20, display: "flex", flexDirection: "column", gap: 14 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <div style={{ fontSize: 10, fontWeight: 800, color: T.gold, textTransform: "uppercase", letterSpacing: "0.06em" }}>✨ Adaptively Generated Outreach Bundle</div>
+                </div>
+
+                <div style={{ background: T.void, border: `1px solid ${T.border}`, borderRadius: 6, padding: 14 }}>
+                  <pre style={{ margin: 0, fontSize: 12, color: T.text, whiteSpace: "pre-wrap", fontFamily: "inherit", lineHeight: 1.6 }}>{result.messageBody}</pre>
+                </div>
+              </div>
+
+              <div style={{ background: T.panel, border: `1px solid ${T.border}`, borderRadius: 8, padding: 20 }}>
+                <div style={{ color: T.ink, fontSize: 13, fontWeight: 700, marginBottom: 14 }}>Confidence Distribution</div>
+                {result.scores.map((s, i) => <ConfidenceBar key={s.id} persona={s.id} conf={s.conf} rank={i} />)}
+              </div>
+            </>
+          ) : (
+            <div style={{ background: T.panel, border: `1px dashed ${T.border}`, borderRadius: 8, padding: 40, textAlign: "center", display: "flex", flexDirection: "column", gap: 10, alignItems: "center" }}>
+              <span style={{ fontSize: 36 }}>🎯</span>
+              <div style={{ color: T.ink, fontWeight: 700, fontSize: 14 }}>No parameters classified</div>
+              <div style={{ color: T.soft, fontSize: 12, lineHeight: 1.5 }}>Adjust configuration sliders to map client behavioral attributes into outreach variants.</div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── AD CARD ──────────────────────────────────────────────────────────────────
 function AdCard({ persona, copy, loading, onClick }) {
   return (
-    <div style={{
-      background: T.panel, border: `1px solid ${T.border}`, borderRadius: 16,
-      padding: "24px", display: "flex", flexDirection: "column", gap: 12,
-      position: "relative", overflow: "hidden", transition: "all 0.2s ease",
-      cursor: copy ? "pointer" : "default",
-    }}
-      onClick={copy ? onClick : undefined}
-      onMouseEnter={e => { if (copy) e.currentTarget.style.transform = "translateY(-4px)"; }}
-      onMouseLeave={e => { if (copy) e.currentTarget.style.transform = "translateY(0)"; }}
-    >
-      <div style={{
-        position: "absolute", top: 0, left: 0, right: 0, height: 3,
-        background: `linear-gradient(90deg, ${persona.color}, ${persona.color}88)`,
-      }} />
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <span style={{ fontSize: 22 }}>{persona.icon}</span>
+    <div style={{ background: T.panel, border: `1px solid ${T.border}`, borderRadius: 8, padding: "24px", display: "flex", flexDirection: "column", gap: 14, position: "relative", overflow: "hidden", transition: "all 0.2s ease-in-out", cursor: copy ? "pointer" : "default", boxShadow: "0 1px 2px rgba(0,0,0,0.02)" }} onClick={copy ? onClick : undefined} onMouseEnter={e => { if (copy) { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.borderColor = T.gold; } }} onMouseLeave={e => { if (copy) { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = T.border; } }}>
+      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 4, background: persona.color }} />
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <span style={{ fontSize: 18, background: T.void, padding: 6, borderRadius: 4 }}>{persona.icon}</span>
         <div>
-          <div style={{ color: persona.color, fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>{persona.label}</div>
+          <div style={{ color: T.ink, fontSize: 13, fontWeight: 700 }}>{persona.label}</div>
           <div style={{ color: T.soft, fontSize: 11 }}>{persona.desc}</div>
         </div>
       </div>
-
       {loading ? (
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {[80, 60, 95, 50].map((w, i) => (
-            <div key={i} style={{
-              height: i === 0 ? 18 : 12, width: `${w}%`, borderRadius: 6,
-              background: `linear-gradient(90deg, ${T.muted}, ${T.border}, ${T.muted})`,
-              backgroundSize: "200% 100%", animation: "shimmer 1.5s infinite",
-            }} />
-          ))}
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {[90, 75, 95, 60].map((w, i) => <div key={i} style={{ height: i === 0 ? 16 : 11, width: `${w}%`, borderRadius: 4, background: `linear-gradient(90deg, ${T.void}, ${T.border}, ${T.void})`, backgroundSize: "200% 100%", animation: "shimmer 1.5s infinite" }} />)}
         </div>
       ) : copy ? (
         <>
-          {copy.badge && (
-            <span style={{
-              alignSelf: "flex-start", background: `${persona.color}22`, color: persona.color,
-              fontSize: 10, fontWeight: 700, padding: "3px 10px", borderRadius: 20, letterSpacing: "0.08em",
-            }}>{copy.badge}</span>
-          )}
-          <div style={{ color: "#FFFFFF", fontSize: 18, fontWeight: 800, lineHeight: 1.3 }}>{copy.headline}</div>
-          {copy.subheadline && <div style={{ color: T.text, fontSize: 14, fontWeight: 500 }}>{copy.subheadline}</div>}
-          <div style={{ color: T.soft, fontSize: 13, lineHeight: 1.6 }}>{copy.body}</div>
-          {copy.proof && (
-            <div style={{
-              background: T.ink, borderRadius: 8, padding: "10px 14px",
-              color: T.text, fontSize: 12, borderLeft: `3px solid ${persona.color}`,
-            }}>{copy.proof}</div>
-          )}
-          <button 
-            onClick={(e) => { e.stopPropagation(); onClick(); }}
-            style={{
-              marginTop: "auto", padding: "10px 18px", borderRadius: 10,
-              background: `linear-gradient(135deg, ${persona.color}, ${persona.color}BB)`,
-              border: "none", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer",
-            }}
-          >
-            {copy.cta || "Get Started →"}
-          </button>
+          {copy.badge && <span style={{ alignSelf: "flex-start", background: T.goldBg, color: T.gold, fontSize: 10, fontWeight: 700, padding: "3px 8px", borderRadius: 4 }}>{copy.badge}</span>}
+          <div style={{ color: T.accent, fontSize: 16, fontWeight: 800 }}>{copy.headline}</div>
+          {copy.subheadline && <div style={{ color: T.ink, fontSize: 13, fontWeight: 600 }}>{copy.subheadline}</div>}
+          <div style={{ color: T.text, fontSize: 13, lineHeight: 1.6 }}>{copy.body}</div>
+          {copy.proof && <div style={{ background: T.void, borderRadius: 4, padding: "10px 12px", color: T.ink, fontSize: 12, borderLeft: `3px solid ${T.gold}`, fontWeight: 500 }}>{copy.proof}</div>}
         </>
       ) : (
-        <div style={{ color: T.muted, fontSize: 13, textAlign: "center", padding: "20px 0" }}>Waiting to generate…</div>
+        <div style={{ color: T.muted, fontSize: 13, textAlign: "center", padding: "20px 0", border: `1px dashed ${T.border}`, borderRadius: 6 }}>Awaiting baseline configuration…</div>
       )}
     </div>
   );
 }
 
-// ─── STREAMDECODER OVERLAY ────────────────────────────────────────────────────
-function FrictionOverlay({ friction, intervention, onDismiss }) {
-  const [chatOpen, setChatOpen] = useState(false);
-  const [msg, setMsg] = useState("");
-  const [copied, setCopied] = useState(false);
-  const type = intervention?.intervention_type || "promo_banner";
-  const payload = intervention?.payload || {
-    icon: "%",
-    message: "Still deciding? Here's 10% off if you check out now.",
-    discount_code: "STAY10"
-  };
-
-  const initialMessage = type === "chatbot" 
-    ? (payload.message || "Hey! Looks like you might have some questions. What can I help with?")
-    : "Hey! How can I help you today?";
-
-  const [chatLog, setChatLog] = useState([
-    { role: "bot", text: initialMessage }
-  ]);
-  const [typing, setTyping] = useState(false);
-
-  useEffect(() => {
-    setChatLog([{ role: "bot", text: initialMessage }]);
-  }, [initialMessage]);
-
-  const send = async () => {
-    if (!msg.trim()) return;
-    const userMsg = msg.trim();
-    setMsg("");
-    setChatLog(l => [...l, { role: "user", text: userMsg }]);
-    setTyping(true);
-
-    setTimeout(() => {
-      let botResponse = "That's a great question! Let me connect you with our engineering support team.";
-      const lowerMsg = userMsg.toLowerCase();
-      
-      if (lowerMsg.includes("spec") || lowerMsg.includes("dimension") || lowerMsg.includes("material") || lowerMsg.includes("warranty")) {
-        botResponse = "Our product features a high-grade carbon fiber body, dimensions of 14.2\" x 9.8\" x 0.6\", and comes with a full 3-year warranty. We are fully compatible with REST/FastAPI.";
-      } else if (lowerMsg.includes("discount") || lowerMsg.includes("coupon") || lowerMsg.includes("price") || lowerMsg.includes("stay10")) {
-        botResponse = "Use the promo code STAY10 at checkout to claim your 10% discount!";
-      } else if (lowerMsg.includes("shipping") || lowerMsg.includes("goldship") || lowerMsg.includes("free")) {
-        botResponse = "Your Gold Loyalty perk grants you free express shipping with code GOLDSHIP!";
-      } else if (lowerMsg.includes("hi") || lowerMsg.includes("hello") || lowerMsg.includes("hey")) {
-        botResponse = "Hello! I am your Chameleon Support Agent. Ask me about specifications, warranty, or discounts.";
-      }
-      
-      setChatLog(l => [...l, { role: "bot", text: botResponse }]);
-      setTyping(false);
-    }, 800);
-  };
-
-  const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  return (
-    <div style={{
-      position: "fixed", bottom: 24, right: 24, zIndex: 1000,
-      display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 12,
-    }}>
-      {chatOpen && type === "chatbot" && (
-        <div style={{
-          width: 320, background: T.panel, border: `1px solid ${T.border}`,
-          borderRadius: 16, overflow: "hidden", boxShadow: "0 20px 60px #00000088",
-        }}>
-          <div style={{
-            background: `linear-gradient(135deg, ${T.accent}, #9333EA)`,
-            padding: "14px 16px", display: "flex", justifyContent: "space-between", alignItems: "center",
-          }}>
-            <div>
-              <div style={{ color: "#fff", fontWeight: 700, fontSize: 14 }}>{payload.title || "Need help with specs?"}</div>
-              <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 11 }}>Friction detected · Technical Support</div>
-            </div>
-            <button onClick={() => setChatOpen(false)} style={{ background: "none", border: "none", color: "#fff", fontSize: 18, cursor: "pointer" }}>×</button>
-          </div>
-          <div style={{ height: 200, overflowY: "auto", padding: 12, display: "flex", flexDirection: "column", gap: 8 }}>
-            {chatLog.map((m, i) => (
-              <div key={i} style={{
-                alignSelf: m.role === "user" ? "flex-end" : "flex-start",
-                background: m.role === "user" ? T.accent : T.ink,
-                color: T.text, borderRadius: 10, padding: "8px 12px", fontSize: 13, maxWidth: "80%",
-              }}>{m.text}</div>
-            ))}
-            {typing && <div style={{ color: T.soft, fontSize: 12, padding: "4px 8px" }}>Typing…</div>}
-          </div>
-          <div style={{ padding: 12, borderTop: `1px solid ${T.border}`, display: "flex", gap: 8 }}>
-            <input
-              value={msg} onChange={e => setMsg(e.target.value)}
-              onKeyDown={e => e.key === "Enter" && send()}
-              placeholder="Ask specs, compatibility..."
-              style={{
-                flex: 1, background: T.ink, border: `1px solid ${T.border}`, borderRadius: 8,
-                padding: "8px 12px", color: T.text, fontSize: 13, outline: "none",
-              }}
-            />
-            <button onClick={send} style={{
-              background: T.accent, border: "none", borderRadius: 8, padding: "8px 12px",
-              color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 13,
-            }}>→</button>
-          </div>
-        </div>
-      )}
-
-      {!chatOpen && (type === "promo_banner" || type === "loyalty_perk") && (
-        <div style={{
-          width: 320, background: T.panel, border: `1px solid ${T.border}`,
-          borderRadius: 16, padding: "20px", display: "flex", flexDirection: "column", gap: 12,
-          boxShadow: "0 15px 45px #000000aa", position: "relative", overflow: "hidden",
-          animation: "fadeIn 0.3s ease",
-        }}>
-          <div style={{
-            position: "absolute", top: 0, left: 0, right: 0, height: 3,
-            background: type === "loyalty_perk" ? `linear-gradient(90deg, ${T.gold}, #F59E0B)` : `linear-gradient(90deg, ${T.orange}, #E65C00)`,
-          }} />
-          
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <span style={{
-                fontSize: 22, width: 36, height: 36, borderRadius: "50%",
-                background: type === "loyalty_perk" ? `${T.gold}22` : `${T.orange}22`,
-                display: "flex", alignItems: "center", justifyItems: "center", justifyContent: "center",
-                color: type === "loyalty_perk" ? T.gold : T.orange
-              }}>
-                {payload.icon || (type === "loyalty_perk" ? "★" : "%")}
-              </span>
-              <div>
-                <div style={{
-                  color: type === "loyalty_perk" ? T.gold : T.orange,
-                  fontSize: 10, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase"
-                }}>
-                  {type === "loyalty_perk" ? "VIP Privilege Activated" : "Limited-Time Discount"}
-                </div>
-                <div style={{ color: "#fff", fontSize: 13, fontWeight: 700 }}>
-                  {type === "loyalty_perk" ? "Gold loyalty shipping" : "Hesitation discount"}
-                </div>
-              </div>
-            </div>
-            <button onClick={onDismiss} style={{
-              background: "none", border: "none", color: T.soft, fontSize: 18, cursor: "pointer"
-            }}>×</button>
-          </div>
-
-          <p style={{ margin: 0, fontSize: 12, color: T.text, lineHeight: 1.5 }}>
-            {payload.message}
-          </p>
-
-          {(payload.discount_code || payload.perk_code) && (
-            <div style={{
-              display: "flex", background: T.ink, border: `1px solid ${T.border}`,
-              borderRadius: 8, padding: 6, alignItems: "center", justifyContent: "space-between"
-            }}>
-              <span style={{
-                fontFamily: "monospace", color: "#fff", fontWeight: 700,
-                fontSize: 14, marginLeft: 10
-              }}>
-                {payload.discount_code || payload.perk_code}
-              </span>
-              <button 
-                onClick={() => copyToClipboard(payload.discount_code || payload.perk_code)}
-                style={{
-                  background: type === "loyalty_perk" ? T.gold : T.orange, border: "none",
-                  borderRadius: 6, color: "#fff", padding: "5px 12px", fontSize: 11,
-                  fontWeight: 700, cursor: "pointer"
-                }}
-              >
-                {copied ? "Copied!" : "Copy Code"}
-              </button>
-            </div>
-          )}
-
-          {type === "loyalty_perk" && intervention?.identity && (
-            <div style={{
-              borderTop: `1px solid ${T.border}`, paddingTop: 10,
-              display: "flex", justifyContent: "space-between", fontSize: 10, color: T.soft
-            }}>
-              <span>User: {intervention.identity.unified_id}</span>
-              <span>Loyalty: Gold ({intervention.identity.past_purchases} orders)</span>
-            </div>
-          )}
-        </div>
-      )}
-
-      <div style={{ display: "flex", gap: 10 }}>
-        {chatOpen ? null : (
-          <>
-            <button onClick={onDismiss} style={{
-              background: T.muted, border: "none", borderRadius: 50, width: 44, height: 44,
-              color: T.soft, cursor: "pointer", fontSize: 16,
-            }}>×</button>
-            <button onClick={() => {
-              if (type === "chatbot") {
-                setChatOpen(true);
-              } else {
-                copyToClipboard(payload.discount_code || payload.perk_code);
-              }
-            }} style={{
-              background: type === "loyalty_perk" ? `linear-gradient(135deg, ${T.gold}, #F59E0B)` : type === "promo_banner" ? `linear-gradient(135deg, ${T.orange}, #E65C00)` : `linear-gradient(135deg, ${T.accent}, #9333EA)`,
-              border: "none", borderRadius: 50, width: 52, height: 52,
-              color: "#fff", cursor: "pointer", fontSize: 22, boxShadow: `0 0 20px ${T.accentGlow}`,
-              animation: "pulse 2s infinite",
-              display: "flex", alignItems: "center", justifyContent: "center"
-            }}>
-              {type === "chatbot" ? "💬" : type === "loyalty_perk" ? "★" : "%"}
-            </button>
-          </>
-        )}
-      </div>
-
-      {!chatOpen && type === "chatbot" && (
-        <div style={{
-          background: T.panel, border: `1px solid ${T.border}`, borderRadius: 12,
-          padding: "10px 16px", fontSize: 13, color: T.text, maxWidth: 240,
-          boxShadow: "0 8px 24px #00000066",
-        }}>
-          🎯 <strong>{payload.title}</strong> — {payload.message}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── STREAMDECODER DASHBOARD ──────────────────────────────────────────────────
-function StreamDecoderPanel({ 
-  matrix, enabled, onToggle, identityHint, setIdentityHint, 
-  backendStatus, activeIntervention, sessionId 
-}) {
+// ─── STREAMDECODER PANEL ──────────────────────────────────────────────────────
+function StreamDecoderPanel({ matrix, enabled, onToggle, identityHint, setIdentityHint, backendStatus, activeIntervention, sessionId }) {
   const signals = [
     { label: "Hover Bursts", key: "hover", icon: "🖱️", color: T.accent },
     { label: "Erratic Scrolls", key: "scroll", icon: "📜", color: T.orange },
@@ -1077,168 +429,125 @@ function StreamDecoderPanel({
     { label: "Long Pauses", key: "pause", icon: "⏸️", color: T.green },
   ];
   const score = Object.values(matrix.current || {}).reduce((a, b) => a + b, 0);
-
   return (
-    <div style={{
-      background: T.panel, border: `1px solid ${T.border}`, borderRadius: 16,
-      padding: 20, display: "flex", flexDirection: "column", gap: 16,
-    }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+    <div style={{ background: T.panel, border: `1px solid ${T.border}`, borderRadius: 8, padding: 24, display: "flex", flexDirection: "column", gap: 20 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
         <div>
-          <div style={{ color: T.text, fontWeight: 700, fontSize: 15 }}>StreamDecoder</div>
-          <div style={{ color: T.soft, fontSize: 12 }}>Live friction detection engine</div>
+          <div style={{ color: T.ink, fontSize: 15, fontWeight: 700 }}>Telemetry Collection Array</div>
+          <div style={{ color: T.soft, fontSize: 12 }}>Implicit user friction log indexes</div>
         </div>
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-          <select 
-            value={identityHint} 
-            onChange={(e) => setIdentityHint(e.target.value)}
-            style={{
-              background: T.ink,
-              color: T.text,
-              border: `1px solid ${T.border}`,
-              borderRadius: 8,
-              padding: "6px 12px",
-              fontSize: 12,
-              outline: "none",
-              cursor: "pointer",
-            }}
-          >
-            <option value="none">👤 Anonymous User</option>
-            <option value="cookie_abc123">🥈 cookie_abc123 (Silver Tier)</option>
-            <option value="cookie_def456">🥇 cookie_def456 (Gold Tier)</option>
-            <option value="device_xyz789">🥈 device_xyz789 (Silver Tier)</option>
+          <select value={identityHint} onChange={e => setIdentityHint(e.target.value)} style={{ background: T.void, color: T.ink, border: `1px solid ${T.border}`, borderRadius: 4, padding: "6px 12px", fontSize: 12, outline: "none", cursor: "pointer" }}>
+            <option value="none">👤 Anonymous Pipeline</option>
+            <option value="cookie_abc123">🥈 cookie_abc123 (Silver)</option>
+            <option value="cookie_def456">🥇 cookie_def456 (Gold)</option>
+            <option value="device_xyz789">🥈 device_xyz789 (Silver)</option>
           </select>
-          <button onClick={onToggle} style={{
-            background: enabled ? `${T.green}22` : T.muted,
-            border: `1px solid ${enabled ? T.green : T.border}`,
-            borderRadius: 20, padding: "5px 14px", color: enabled ? T.green : T.soft,
-            cursor: "pointer", fontSize: 12, fontWeight: 700,
-          }}>{enabled ? "● ACTIVE" : "○ OFF"}</button>
+          <button onClick={onToggle} style={{ background: enabled ? T.goldBg : T.void, border: `1px solid ${enabled ? T.gold : T.border}`, borderRadius: 4, padding: "6px 14px", color: enabled ? T.gold : T.soft, cursor: "pointer", fontSize: 12, fontWeight: 700 }}>
+            {enabled ? "SYSTEM ON" : "OFFLINE"}
+          </button>
         </div>
       </div>
-
-      <div style={{
-        background: T.ink, borderRadius: 10, padding: "12px 16px",
-        display: "flex", justifyContent: "space-between", alignItems: "center",
-        border: `1px solid ${T.border}`
-      }}>
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <span style={{ color: T.soft, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.05em" }}>Session ID</span>
-          <span style={{ fontSize: 12, color: T.text, fontFamily: "monospace" }}>{sessionId.slice(0, 15)}...</span>
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
-          <span style={{ color: T.soft, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.05em" }}>Backend API</span>
-          <span style={{
-            fontSize: 11, fontWeight: 800,
-            color: backendStatus === "connected" ? T.green : backendStatus === "error" ? T.red : T.soft,
-          }}>
-            {backendStatus === "connected" ? "● CONNECTED" : backendStatus === "error" ? "● OFFLINE" : "○ DISCONNECTED"}
-          </span>
-        </div>
+      <div style={{ background: T.void, borderRadius: 6, padding: "12px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", border: `1px solid ${T.border}` }}>
+        <div><span style={{ color: T.soft, fontSize: 10, textTransform: "uppercase" }}>Session Token</span><br /><span style={{ fontSize: 12, color: T.accent, fontFamily: "monospace", fontWeight: 600 }}>{sessionId.slice(0, 15)}...</span></div>
+        <div style={{ textAlign: "right" }}><span style={{ color: T.soft, fontSize: 10, textTransform: "uppercase" }}>Backend</span><br /><span style={{ fontSize: 11, fontWeight: 800, color: backendStatus === "connected" ? T.green : backendStatus === "error" ? T.red : T.soft }}>{backendStatus === "connected" ? "STABLE" : backendStatus === "error" ? "FAULT" : "DISCONNECTED"}</span></div>
       </div>
-
-      {activeIntervention && (
-        <div style={{
-          background: `${activeIntervention.intervention_type === "loyalty_perk" ? T.gold : activeIntervention.intervention_type === "promo_banner" ? T.orange : T.accent}22`,
-          border: `1px solid ${activeIntervention.intervention_type === "loyalty_perk" ? T.gold : activeIntervention.intervention_type === "promo_banner" ? T.orange : T.accent}44`,
-          borderRadius: 10, padding: "12px 16px",
-          display: "flex", flexDirection: "column", gap: 6,
-          animation: "fadeIn 0.3s ease",
-        }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ 
-              fontSize: 10, fontWeight: 800, 
-              color: activeIntervention.intervention_type === "loyalty_perk" ? T.gold : activeIntervention.intervention_type === "promo_banner" ? T.orange : T.accent, 
-              textTransform: "uppercase", letterSpacing: "0.05em" 
-            }}>
-              🎯 Backend Trigger: {activeIntervention.intervention_type}
-            </span>
-            <span style={{ fontSize: 10, color: T.soft }}>Confidence: {activeIntervention.confidence || 0.8}</span>
-          </div>
-          <div style={{ fontSize: 12, color: "#fff", fontWeight: 700 }}>
-            {activeIntervention.payload?.message || activeIntervention.payload?.title}
-          </div>
-          {activeIntervention.payload?.discount_code && (
-            <div style={{ fontSize: 11, color: T.soft }}>
-              Coupon: <strong style={{ color: T.orange }}>{activeIntervention.payload.discount_code}</strong>
-            </div>
-          )}
-          {activeIntervention.payload?.perk_code && (
-            <div style={{ fontSize: 11, color: T.soft }}>
-              Shipping Perk: <strong style={{ color: T.gold }}>{activeIntervention.payload.perk_code}</strong>
-            </div>
-          )}
-        </div>
-      )}
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
         {signals.map(s => {
           const val = (matrix.current || {})[s.key] || 0;
           return (
-            <div key={s.key} style={{
-              background: T.ink, borderRadius: 10, padding: "10px 14px",
-              border: `1px solid ${val > 3 ? s.color + "44" : T.border}`,
-            }}>
+            <div key={s.key} style={{ background: T.void, borderRadius: 6, padding: "12px", border: `1px solid ${val > 3 ? s.color : T.border}` }}>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ fontSize: 11, color: T.soft }}>{s.icon} {s.label}</span>
-                <span style={{ fontSize: 13, fontWeight: 700, color: val > 3 ? s.color : T.text }}>{val}</span>
+                <span style={{ fontSize: 12, color: T.soft }}>{s.icon} {s.label}</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: T.ink }}>{val}</span>
               </div>
-              <div style={{ marginTop: 6, height: 3, background: T.border, borderRadius: 3 }}>
-                <div style={{
-                  height: "100%", borderRadius: 3, width: `${Math.min(val * 12, 100)}%`,
-                  background: s.color, transition: "width 0.5s",
-                }} />
+              <div style={{ marginTop: 8, height: 4, background: T.border, borderRadius: 2 }}>
+                <div style={{ height: "100%", borderRadius: 2, width: `${Math.min(val * 12, 100)}%`, background: s.color, transition: "width 0.4s ease" }} />
               </div>
             </div>
           );
         })}
       </div>
-
-      <div style={{
-        background: T.ink, borderRadius: 10, padding: "12px 16px",
-        display: "flex", justifyContent: "space-between", alignItems: "center",
-      }}>
-        <span style={{ color: T.soft, fontSize: 12 }}>Local Friction Score</span>
-        <span style={{
-          fontSize: 22, fontWeight: 900,
-          color: score > 14 ? T.red : score > 8 ? T.orange : T.green,
-        }}>{score}</span>
-      </div>
-
-      <div style={{ color: T.soft, fontSize: 11, lineHeight: 1.6 }}>
-        Intervention fires at score &gt; 14. Tracking: hover velocity, scroll erraticism, text selection, idle pauses. Intent matrix resets every 20s post-trigger.
+      <div style={{ background: T.void, borderRadius: 6, padding: "14px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", border: `1px solid ${T.border}` }}>
+        <span style={{ color: T.text, fontSize: 13, fontWeight: 600 }}>Matrix Friction Delta</span>
+        <span style={{ fontSize: 20, fontWeight: 900, color: score > 14 ? T.red : score > 8 ? T.orange : T.green }}>{score}</span>
       </div>
     </div>
   );
 }
 
+// ─── FRICTION OVERLAY ─────────────────────────────────────────────────────────
+function FrictionOverlay({ friction, intervention, onDismiss }) {
+  const [chatOpen, setChatOpen] = useState(false);
+  const [msg, setMsg] = useState("");
+  const [copied, setCopied] = useState(false);
+  const type = intervention?.intervention_type || "promo_banner";
+  const payload = intervention?.payload || { icon: "%", message: "Still deciding? Here's 10% off.", discount_code: "STAY10" };
+  const [chatLog, setChatLog] = useState([{ role: "bot", text: payload.message || "Hey! How can I help you today?" }]);
+  const [typing, setTyping] = useState(false);
+  const send = async () => {
+    if (!msg.trim()) return;
+    const userMsg = msg.trim(); setMsg(""); setChatLog(l => [...l, { role: "user", text: userMsg }]); setTyping(true);
+    setTimeout(() => { setChatLog(l => [...l, { role: "bot", text: "That's a great question! Let me connect you with support." }]); setTyping(false); }, 800);
+  };
+  const copy = (t) => { navigator.clipboard.writeText(t); setCopied(true); setTimeout(() => setCopied(false), 2000); };
+  return (
+    <div style={{ position: "fixed", bottom: 24, right: 24, zIndex: 1000, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 12 }}>
+      {chatOpen && type === "chatbot" && (
+        <div style={{ width: 320, background: T.panel, border: `1px solid ${T.border}`, borderRadius: 8, overflow: "hidden", boxShadow: "0 12px 30px rgba(0,0,0,0.08)" }}>
+          <div style={{ background: T.accent, padding: "16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ color: "#fff", fontWeight: 700, fontSize: 14 }}>Support Chat</div>
+            <button onClick={() => setChatOpen(false)} style={{ background: "none", border: "none", color: "#fff", fontSize: 20, cursor: "pointer" }}>×</button>
+          </div>
+          <div style={{ height: 200, overflowY: "auto", padding: 12, display: "flex", flexDirection: "column", gap: 8, background: T.void }}>
+            {chatLog.map((m, i) => <div key={i} style={{ alignSelf: m.role === "user" ? "flex-end" : "flex-start", background: m.role === "user" ? T.gold : T.panel, color: m.role === "user" ? "#fff" : T.ink, border: m.role === "user" ? "none" : `1px solid ${T.border}`, borderRadius: 4, padding: "8px 12px", fontSize: 13, maxWidth: "80%" }}>{m.text}</div>)}
+            {typing && <div style={{ color: T.soft, fontSize: 12, padding: "4px 8px" }}>Typing…</div>}
+          </div>
+          <div style={{ padding: 12, borderTop: `1px solid ${T.border}`, display: "flex", gap: 8 }}>
+            <input value={msg} onChange={e => setMsg(e.target.value)} onKeyDown={e => e.key === "Enter" && send()} placeholder="Ask a question..." style={{ flex: 1, background: T.void, border: `1px solid ${T.border}`, borderRadius: 4, padding: "8px 12px", color: T.ink, fontSize: 13, outline: "none" }} />
+            <button onClick={send} style={{ background: T.accent, border: "none", borderRadius: 4, padding: "8px 12px", color: "#fff", fontWeight: 700, cursor: "pointer" }}>→</button>
+          </div>
+        </div>
+      )}
+      {!chatOpen && (type === "promo_banner" || type === "loyalty_perk") && (
+        <div style={{ width: 300, background: T.panel, border: `1px solid ${T.border}`, borderRadius: 8, padding: "16px", boxShadow: "0 8px 24px rgba(0,0,0,0.06)", position: "relative", overflow: "hidden" }}>
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: type === "loyalty_perk" ? T.gold : T.orange }} />
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
+            <span style={{ color: T.ink, fontSize: 13, fontWeight: 700 }}>{type === "loyalty_perk" ? "Loyalty Perk" : "Special Offer"}</span>
+            <button onClick={onDismiss} style={{ background: "none", border: "none", color: T.soft, fontSize: 18, cursor: "pointer" }}>×</button>
+          </div>
+          <p style={{ margin: "0 0 10px", fontSize: 12, color: T.text, lineHeight: 1.5 }}>{payload.message}</p>
+          {(payload.discount_code || payload.perk_code) && (
+            <div style={{ display: "flex", background: T.void, border: `1px solid ${T.border}`, borderRadius: 4, padding: 6, alignItems: "center", justifyContent: "space-between" }}>
+              <span style={{ fontFamily: "monospace", color: T.accent, fontSize: 13, marginLeft: 8, fontWeight: 700 }}>{payload.discount_code || payload.perk_code}</span>
+              <button onClick={() => copy(payload.discount_code || payload.perk_code)} style={{ background: T.gold, border: "none", borderRadius: 4, color: "#fff", padding: "5px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>{copied ? "Copied" : "Copy"}</button>
+            </div>
+          )}
+        </div>
+      )}
+      <button onClick={() => { if (type === "chatbot") setChatOpen(true); else copy(payload.discount_code || payload.perk_code); }} style={{ background: type === "loyalty_perk" ? T.gold : type === "promo_banner" ? T.orange : T.accent, border: "none", borderRadius: 50, width: 48, height: 48, color: "#fff", cursor: "pointer", fontSize: 18, boxShadow: "0 6px 16px rgba(0,0,0,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        {type === "chatbot" ? "💬" : type === "loyalty_perk" ? "★" : "%"}
+      </button>
+    </div>
+  );
+}
+
+// ─── ROI SANDBOX ──────────────────────────────────────────────────────────────
 function RoiCalculatorSandbox() {
   const [teams, setTeams] = useState(15);
   return (
-    <div style={{
-      background: T.panel, borderRadius: 10, padding: 16,
-      border: `1px solid ${T.border}`, display: "flex", flexDirection: "column", gap: 12
-    }}>
-      <strong style={{ color: T.gold, fontSize: 12 }}>💰 ROI Calculator Sandbox:</strong>
-      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
-          <span>Team size: <strong>{teams} devs</strong></span>
-          <span style={{ color: T.green }}>Save: <strong>${teams * 360}/mo</strong></span>
-        </div>
-        <input 
-          type="range" min="5" max="100" value={teams} 
-          onChange={e => setTeams(parseInt(e.target.value))} 
-          style={{ width: "100%", accentColor: T.gold, cursor: "pointer" }}
-        />
+    <div style={{ background: T.void, borderRadius: 6, padding: 16, border: `1px solid ${T.border}`, display: "flex", flexDirection: "column", gap: 12 }}>
+      <strong style={{ color: T.ink, fontSize: 12, fontWeight: 700 }}>💰 Scaled Cost Mapping:</strong>
+      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
+        <span>Nodes: <strong>{teams}</strong></span>
+        <span style={{ color: T.green, fontWeight: 700 }}>Yield: <strong>${teams * 360}/mo</strong></span>
       </div>
-      <div style={{ fontSize: 11, color: T.soft, borderTop: `1px solid ${T.border}`, paddingTop: 8 }}>
-        Calculated return: <strong>{(teams * 360 * 12 / 2400).toFixed(1)}x</strong> software payback in Q1.
-      </div>
+      <input type="range" min="5" max="100" value={teams} onChange={e => setTeams(parseInt(e.target.value))} style={{ width: "100%", accentColor: T.accent, cursor: "pointer" }} />
     </div>
   );
 }
 
-// ─── MAIN APP ─────────────────────────────────────────────────────────────────
+// ─── MAIN APP SYSTEM ENTRY ────────────────────────────────────────────────────
 export default function App() {
   const [product, setProduct] = useState("");
   const [copies, setCopies] = useState({});
@@ -1247,7 +556,6 @@ export default function App() {
   const [friction, setFriction] = useState(null);
   const [decoderEnabled, setDecoderEnabled] = useState(false);
   const [activeTab, setActiveTab] = useState("chameleon");
-
   const [sessionId] = useState(() => "session_" + Math.random().toString(36).substring(2, 11));
   const [identityHint, setIdentityHint] = useState("none");
   const [backendStatus, setBackendStatus] = useState("disconnected");
@@ -1255,167 +563,81 @@ export default function App() {
   const [selectedAd, setSelectedAd] = useState(null);
 
   const matrix = useStreamDecoder(
-    decoderEnabled,
-    sessionId,
-    identityHint,
-    backendStatus,
-    setBackendStatus,
-    useCallback((intervention) => {
-      setActiveIntervention(intervention);
-      setFriction({ score: 15, backend: true });
-    }, [])
+    decoderEnabled, sessionId, identityHint, backendStatus, setBackendStatus,
+    useCallback((intervention) => { setActiveIntervention(intervention); setFriction({ score: 15, backend: true }); }, [])
   );
 
   const generate = async () => {
     if (!product.trim()) return;
-    setGenerated(true);
-    setCopies({});
-    const loadingMap = {};
-    PERSONAS.forEach(p => loadingMap[p.id] = true);
-    setLoading(loadingMap);
-
+    setGenerated(true); setCopies({});
+    const lm = {}; PERSONAS.forEach(p => lm[p.id] = true); setLoading(lm);
     try {
-      const res = await fetch("http://localhost:8000/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ product })
-      });
-      if (!res.ok) throw new Error(`Backend generation failed: ${res.statusText}`);
-      const data = await res.json();
-      setCopies(data);
-    } catch (err) {
-      console.error("[Ad Generation Error]: Failed to fetch from backend", err);
-      // Fallback: generate using local dynamic templates
-      const fallbacks = getDynamicTemplates(product);
-      setCopies(fallbacks);
+      const res = await fetch("http://localhost:8000/generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ product }) });
+      if (!res.ok) throw new Error();
+      setCopies(await res.json());
+    } catch {
+      setCopies(getDynamicTemplates(product));
     } finally {
-      const loadedMap = {};
-      PERSONAS.forEach(p => loadedMap[p.id] = false);
-      setLoading(loadedMap);
+      const lm2 = {}; PERSONAS.forEach(p => lm2[p.id] = false); setLoading(lm2);
     }
   };
 
+  const TABS = [
+    ["chameleon", "Variant Personalization Matrix"],
+    ["profiler",  "Customer Persona Classifier"],
+    ["decoder",   "StreamDecoder Metrics"],
+  ];
+
   return (
-    <div style={{
-      minHeight: "100vh", background: T.void, fontFamily: "'Inter', -apple-system, sans-serif",
-      color: T.text,
-    }}>
+    <div style={{ minHeight: "100vh", background: T.void, fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif", color: T.text, paddingBottom: 60 }}>
       <style>{`
         @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-        @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 #6C63FF44} 50%{box-shadow:0 0 0 12px #6C63FF00} }
-        @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
         * { box-sizing: border-box; }
-        ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #252A34; border-radius: 3px; }
-        input:focus { border-color: #6C63FF !important; box-shadow: 0 0 0 3px #6C63FF22; }
-        textarea:focus { border-color: #6C63FF !important; box-shadow: 0 0 0 3px #6C63FF22; outline: none; }
+        input[type="text"]:focus, textarea:focus { border-color: ${T.gold} !important; box-shadow: 0 0 0 2px ${T.goldBg} !important; outline: none; }
       `}</style>
 
-      {/* Header */}
-      <div style={{ borderBottom: `1px solid ${T.border}`, padding: "0 24px" }}>
-        <div style={{ maxWidth: 1400, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", height: 60 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{
-              width: 32, height: 32, borderRadius: 8,
-              background: `linear-gradient(135deg, ${T.accent}, #9333EA)`,
-              display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16,
-            }}>🦎</div>
-            <div>
-              <div style={{ color: "#fff", fontWeight: 800, fontSize: 15 }}>Social Chameleon</div>
-              <div style={{ color: T.soft, fontSize: 11 }}>+ StreamDecoder</div>
-            </div>
+      {/* Navigation Bar */}
+      <div style={{ borderBottom: `1px solid ${T.border}`, padding: "0 32px", background: T.panel }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", height: 64, gap: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
+            <div style={{ width: 12, height: 12, background: T.accent, borderRadius: "50%" }} />
+            <div style={{ color: T.ink, fontWeight: 700, fontSize: 14, letterSpacing: "-0.01em" }}>Social Chameleon Layer</div>
           </div>
-
-          <div style={{ display: "flex", gap: 4, background: T.ink, borderRadius: 10, padding: 4 }}>
-            {[["chameleon", "🦎 Ad Generator"], ["decoder", "📡 StreamDecoder"]].map(([id, label]) => (
-              <button key={id} onClick={() => setActiveTab(id)} style={{
-                padding: "7px 16px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600,
-                background: activeTab === id ? T.accent : "transparent",
-                color: activeTab === id ? "#fff" : T.soft,
-                transition: "all 0.15s",
-              }}>{label}</button>
+          <div style={{ display: "flex", gap: 4, background: T.void, borderRadius: 6, padding: 3, border: `1px solid ${T.border}` }}>
+            {TABS.map(([id, label]) => (
+              <button key={id} onClick={() => setActiveTab(id)} style={{ padding: "6px 14px", borderRadius: 4, border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600, background: activeTab === id ? T.accent : "transparent", color: activeTab === id ? "#fff" : T.soft, transition: "all 0.1s ease", whiteSpace: "nowrap" }}>{label}</button>
             ))}
-          </div>
-
-          <div style={{
-            display: "flex", alignItems: "center", gap: 6,
-            background: `${T.green}11`, border: `1px solid ${T.green}33`,
-            borderRadius: 20, padding: "5px 14px",
-          }}>
-            <div style={{ width: 6, height: 6, borderRadius: "50%", background: T.green, animation: "pulse 2s infinite" }} />
-            <span style={{ color: T.green, fontSize: 11, fontWeight: 600 }}>LIVE</span>
           </div>
         </div>
       </div>
 
-      <div style={{ maxWidth: 1400, margin: "0 auto", padding: "32px 24px" }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 32px" }}>
+
+        {/* ── CHAMELEON TAB ── */}
         {activeTab === "chameleon" && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
-            {/* Hero input */}
-            <div style={{ textAlign: "center", display: "flex", flexDirection: "column", gap: 6 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.15em", color: T.accent, textTransform: "uppercase" }}>One product → 10 personas</div>
-              <h1 style={{ margin: 0, fontSize: 36, fontWeight: 900, color: "#fff", lineHeight: 1.2 }}>
-                Every buyer sees their<br />
-                <span style={{ background: `linear-gradient(135deg, ${T.accent}, #EC4899)`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>perfect version</span>
-              </h1>
+          <div style={{ display: "flex", flexDirection: "column", gap: 40 }}>
+            <div style={{ textAlign: "center" }}>
+              <h1 style={{ margin: 0, fontSize: 32, fontWeight: 800, color: T.accent, letterSpacing: "-0.02em" }}>Algorithmic Copy Variant Architectures</h1>
             </div>
-
-            <div style={{ maxWidth: 680, margin: "0 auto", width: "100%", display: "flex", flexDirection: "column", gap: 16 }}>
-              <textarea
-                value={product}
-                onChange={e => setProduct(e.target.value)}
-                placeholder="Describe your product or service... e.g. 'A project management SaaS that uses AI to auto-prioritize tasks and reduce meeting time by 40%'"
-                rows={4}
-                style={{
-                  width: "100%", background: T.panel, border: `1px solid ${T.border}`, borderRadius: 12,
-                  padding: "16px 18px", color: T.text, fontSize: 14, resize: "none",
-                  fontFamily: "inherit", lineHeight: 1.6, transition: "all 0.2s",
-                }}
-              />
-              <button
-                onClick={generate}
-                disabled={!product.trim()}
-                style={{
-                  padding: "14px 32px", borderRadius: 12, border: "none",
-                  background: product.trim() ? `linear-gradient(135deg, ${T.accent}, #9333EA)` : T.muted,
-                  color: "#fff", fontWeight: 800, fontSize: 15, cursor: product.trim() ? "pointer" : "default",
-                  boxShadow: product.trim() ? `0 8px 32px ${T.accentGlow}` : "none", transition: "all 0.2s",
-                }}>
-                Generate 10 Persona Variations →
-              </button>
+            <div style={{ maxWidth: 680, margin: "0 auto", width: "100%", display: "flex", flexDirection: "column", gap: 14 }}>
+              <textarea value={product} onChange={e => setProduct(e.target.value)} placeholder="Insert corporate target abstract or baseline service value proposition…" rows={4} style={{ width: "100%", background: T.panel, border: `1px solid ${T.border}`, borderRadius: 6, padding: "14px 18px", color: T.ink, fontSize: 13, resize: "none", fontFamily: "inherit", lineHeight: 1.6 }} />
+              <button onClick={generate} disabled={!product.trim()} style={{ padding: "12px 24px", borderRadius: 6, border: "none", background: product.trim() ? T.accent : T.muted, color: "#fff", fontWeight: 600, fontSize: 13, cursor: product.trim() ? "pointer" : "default" }}>Compile Parameter Variations</button>
             </div>
-
-            {/* Persona grid */}
             {generated && (
-              <div style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
-                gap: 20, animation: "fadeIn 0.4s ease",
-              }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 20, animation: "fadeIn 0.3s ease" }}>
                 {PERSONAS.map(persona => (
-                  <AdCard
-                    key={persona.id}
-                    persona={persona}
-                    copy={copies[persona.id]}
-                    loading={loading[persona.id]}
-                    onClick={() => setSelectedAd({ persona, copy: copies[persona.id] })}
-                  />
+                  <AdCard key={persona.id} persona={persona} copy={copies[persona.id]} loading={loading[persona.id]} onClick={() => setSelectedAd({ persona, copy: copies[persona.id] })} />
                 ))}
               </div>
             )}
-
             {!generated && (
-              <div style={{
-                display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 12,
-              }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 12 }}>
                 {PERSONAS.map(p => (
-                  <div key={p.id} style={{
-                    background: T.panel, border: `1px solid ${T.border}`, borderRadius: 12,
-                    padding: "14px 16px", display: "flex", alignItems: "center", gap: 10,
-                  }}>
-                    <span style={{ fontSize: 20 }}>{p.icon}</span>
+                  <div key={p.id} style={{ background: T.panel, border: `1px solid ${T.border}`, borderRadius: 6, padding: "14px", display: "flex", alignItems: "center", gap: 10 }}>
+                    <span style={{ fontSize: 16, background: T.void, padding: 4, borderRadius: 4 }}>{p.icon}</span>
                     <div>
-                      <div style={{ color: p.color, fontSize: 11, fontWeight: 700 }}>{p.label}</div>
+                      <div style={{ color: T.ink, fontSize: 12, fontWeight: 700 }}>{p.label}</div>
                       <div style={{ color: T.soft, fontSize: 11 }}>{p.desc}</div>
                     </div>
                   </div>
@@ -1425,75 +647,30 @@ export default function App() {
           </div>
         )}
 
+        {/* ── PROFILER TAB ── */}
+        {activeTab === "profiler" && (
+          <CustomerProfilerTab productDesc={product} />
+        )}
+
+        {/* ── DECODER TAB ── */}
         {activeTab === "decoder" && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 24, maxWidth: 700 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 28, maxWidth: 760, margin: "0 auto" }}>
             <div>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.15em", color: T.accent, textTransform: "uppercase", marginBottom: 8 }}>Behavioral Intelligence</div>
-              <h2 style={{ margin: 0, color: "#fff", fontSize: 28, fontWeight: 900 }}>StreamDecoder</h2>
-              <p style={{ color: T.soft, marginTop: 8, lineHeight: 1.7 }}>
-                Detects implicit friction signals — hover velocity, scroll erraticism, text highlights, and idle pauses — running them through an in-memory intent matrix to trigger micro-interventions before users drop off.
-              </p>
+              <h2 style={{ margin: 0, color: T.accent, fontSize: 24, fontWeight: 800 }}>StreamDecoder Matrix Arrays</h2>
+              <p style={{ color: T.soft, marginTop: 6, fontSize: 13, lineHeight: 1.6 }}>Intercepts user drop-offs via scrolling shifts, highlighting, and pause events.</p>
             </div>
-
-            <StreamDecoderPanel 
-              matrix={matrix} 
-              enabled={decoderEnabled} 
-              onToggle={() => setDecoderEnabled(e => !e)} 
-              identityHint={identityHint}
-              setIdentityHint={setIdentityHint}
-              backendStatus={backendStatus}
-              activeIntervention={activeIntervention}
-              sessionId={sessionId}
-            />
-
-            {/* Interactive Specs Sandbox */}
-            <div id="sandbox-specs" style={{ background: T.panel, border: `1px solid ${T.border}`, borderRadius: 16, padding: 20 }}>
-              <div style={{ color: T.text, fontWeight: 700, marginBottom: 6 }}>Friction Sandbox (Interactive Specs)</div>
-              <div style={{ color: T.soft, fontSize: 12, marginBottom: 14 }}>
-                Hover here and select text terms to trigger Technical Friction on the backend.
-              </div>
-              <div style={{
-                background: T.ink, borderRadius: 10, padding: 14,
-                border: `1px solid ${T.border}`, fontSize: 13, lineHeight: 1.6
-              }}>
-                <strong style={{ color: T.accent }}>Product Spec Sheet:</strong><br />
-                • <strong>Material</strong>: High-durability premium carbon composite fiber.<br />
-                • <strong>Dimensions</strong>: 14.2" x 9.8" x 0.6" ultra-thin form factor.<br />
-                • <strong>Compatibility</strong>: Full REST API and WebHook integration.<br />
-                • <strong>Warranty</strong>: 3-year enterprise hardware replacement guarantee.
-              </div>
-            </div>
-
-            <div style={{ background: T.panel, border: `1px solid ${T.border}`, borderRadius: 16, padding: 20 }}>
-              <div style={{ color: T.text, fontWeight: 700, marginBottom: 12 }}>How to trigger an intervention</div>
+            <StreamDecoderPanel matrix={matrix} enabled={decoderEnabled} onToggle={() => setDecoderEnabled(e => !e)} identityHint={identityHint} setIdentityHint={setIdentityHint} backendStatus={backendStatus} activeIntervention={activeIntervention} sessionId={sessionId} />
+            <div style={{ background: T.panel, border: `1px solid ${T.border}`, borderRadius: 6, padding: 20 }}>
+              <div style={{ color: T.ink, fontWeight: 700, fontSize: 13, marginBottom: 14 }}>Intercept Sequence Drivers</div>
               {[
-                ["Move your mouse rapidly and erratically", "Raises hover + scroll signals"],
-                ["Select / highlight text on this page", "Signals reading confusion"],
-                ["Stop moving your mouse for 3+ seconds", "Detected as long pause / hesitation"],
-                ["Scroll up and down quickly multiple times", "Classified as erratic scroll"],
+                ["Oscillate cursor over content blocks", "Spikes hover duration values"],
+                ["Drag highlight across UI text", "Fires selection tracking triggers"],
+                ["Cease activity for 3s", "Registers friction pause state"],
+                ["High-frequency vertical scrolling", "Increments velocity array metrics"],
               ].map(([action, result]) => (
-                <div key={action} style={{ display: "flex", justifyContent: "space-between", padding: "10px 0", borderBottom: `1px solid ${T.border}` }}>
-                  <span style={{ fontSize: 13, color: T.text }}>→ {action}</span>
-                  <span style={{ fontSize: 12, color: T.soft }}>{result}</span>
-                </div>
-              ))}
-              <div style={{ marginTop: 12, color: T.soft, fontSize: 12 }}>
-                When friction score exceeds 14, a chatbot + offer overlay appears in the bottom-right corner.
-              </div>
-            </div>
-
-            <div style={{ background: T.panel, border: `1px solid ${T.border}`, borderRadius: 16, padding: 20 }}>
-              <div style={{ color: T.text, fontWeight: 700, marginBottom: 12 }}>Architecture</div>
-              {[
-                ["Signal capture", "mousemove, scroll, selectionchange, idle timers"],
-                ["In-memory cache", "Rolling 200-event window, 8s recency filter"],
-                ["Intent matrix", "{ hover, scroll, highlight, pause } → friction score"],
-                ["Intervention trigger", "Score > 14 → chatbot + reward overlay"],
-                ["Cooldown", "20s lockout prevents re-trigger spam"],
-              ].map(([k, v]) => (
-                <div key={k} style={{ display: "flex", gap: 16, padding: "10px 0", borderBottom: `1px solid ${T.border}` }}>
-                  <span style={{ fontSize: 12, color: T.accent, fontWeight: 600, minWidth: 140 }}>{k}</span>
-                  <span style={{ fontSize: 12, color: T.soft }}>{v}</span>
+                <div key={action} style={{ display: "flex", justifyContent: "space-between", padding: "12px 0", borderBottom: `1px solid ${T.border}` }}>
+                  <span style={{ fontSize: 13, color: T.text, fontWeight: 500 }}>→ {action}</span>
+                  <span style={{ fontSize: 12, color: T.soft, fontFamily: "monospace" }}>{result}</span>
                 </div>
               ))}
             </div>
@@ -1501,154 +678,27 @@ export default function App() {
         )}
       </div>
 
-      {/* StreamDecoder friction overlay */}
       {friction && decoderEnabled && (
-        <FrictionOverlay 
-          friction={friction} 
-          intervention={activeIntervention}
-          onDismiss={() => {
-            setFriction(null);
-            setActiveIntervention(null);
-          }} 
-        />
+        <FrictionOverlay friction={friction} intervention={activeIntervention} onDismiss={() => { setFriction(null); setActiveIntervention(null); }} />
       )}
 
-      {/* Personalized Landing Page Simulation Modal */}
+      {/* Ad detail modal */}
       {selectedAd && (
-        <div style={{
-          position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
-          background: "rgba(8, 9, 10, 0.95)", backdropFilter: "blur(12px)",
-          zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center",
-          padding: 24, animation: "fadeIn 0.3s ease"
-        }}>
-          <div style={{
-            background: T.panel, border: `1px solid ${T.border}`, borderRadius: 24,
-            maxWidth: 700, width: "100%", overflow: "hidden", display: "flex", flexDirection: "column",
-            boxShadow: "0 30px 90px rgba(0,0,0,0.9)", position: "relative"
-          }}>
-            <div style={{
-              background: `linear-gradient(135deg, ${selectedAd.persona.color}, ${selectedAd.persona.color}99)`,
-              padding: "24px 32px", display: "flex", justifyContent: "space-between", alignItems: "center"
-            }}>
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(70,77,105,0.25)", backdropFilter: "blur(4px)", zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: 24, animation: "fadeIn 0.15s ease" }}>
+          <div style={{ background: T.panel, border: `1px solid ${T.border}`, borderRadius: 8, maxWidth: 680, width: "100%", overflow: "hidden", boxShadow: "0 20px 40px rgba(0,0,0,0.08)" }}>
+            <div style={{ background: T.accent, padding: "20px 28px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div>
-                <span style={{ fontSize: 10, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.15em", color: "rgba(255,255,255,0.8)" }}>
-                  Simulated Funnel Experience: {selectedAd.persona.label}
-                </span>
-                <h2 style={{ margin: "4px 0 0 0", color: "#fff", fontSize: 20, fontWeight: 800 }}>
-                  {selectedAd.copy.headline}
-                </h2>
+                <span style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.05em", color: T.gold }}>Variant: {selectedAd.persona.label}</span>
+                <h2 style={{ margin: "2px 0 0 0", color: "#fff", fontSize: 18, fontWeight: 800 }}>{selectedAd.copy.headline}</h2>
               </div>
-              <button 
-                onClick={() => setSelectedAd(null)}
-                style={{
-                  background: "rgba(255,255,255,0.15)", border: "none", color: "#fff",
-                  borderRadius: "50%", width: 36, height: 36, display: "flex",
-                  alignItems: "center", justifyContent: "center", cursor: "pointer",
-                  fontSize: 18, fontWeight: 700, transition: "background 0.2s"
-                }}
-                onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.25)"}
-                onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.15)"}
-              >
-                ×
-              </button>
+              <button onClick={() => setSelectedAd(null)} style={{ background: "rgba(255,255,255,0.1)", border: "none", color: "#fff", borderRadius: "50%", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 16 }}>×</button>
             </div>
-
-            <div style={{ padding: "32px", display: "flex", flexDirection: "column", gap: 24 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <span style={{ fontSize: 28 }}>{selectedAd.persona.icon}</span>
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>Active Persona Segment:</div>
-                  <div style={{ fontSize: 12, color: T.soft }}>{selectedAd.persona.desc}</div>
-                </div>
-              </div>
-
-              <div style={{
-                background: T.ink, border: `1px solid ${T.border}`, borderRadius: 16,
-                padding: "24px", display: "flex", flexDirection: "column", gap: 16
-              }}>
-                <div style={{
-                  fontSize: 11, fontWeight: 800, textTransform: "uppercase",
-                  letterSpacing: "0.15em", color: selectedAd.persona.color
-                }}>
-                  Personalized Landing Page Hero
-                </div>
-                
-                <h3 style={{ margin: 0, color: "#fff", fontSize: 22, fontWeight: 900 }}>
-                  {selectedAd.copy.headline}
-                </h3>
-                {selectedAd.copy.subheadline && (
-                  <p style={{ margin: 0, color: T.text, fontSize: 14, fontWeight: 500, lineHeight: 1.5 }}>
-                    {selectedAd.copy.subheadline}
-                  </p>
-                )}
-                
-                <p style={{ margin: 0, color: T.soft, fontSize: 13, lineHeight: 1.6 }}>
-                  {selectedAd.copy.body}
-                </p>
-
-                {selectedAd.persona.id === "skeptic" && (
-                  <div style={{
-                    background: T.panel, borderRadius: 10, padding: 16,
-                    border: `1px solid ${T.border}`, display: "flex", flexDirection: "column", gap: 10
-                  }}>
-                    <strong style={{ color: T.green, fontSize: 12 }}>✓ Verified Performance Audits:</strong>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, fontSize: 12 }}>
-                      <div>📊 Latency: <strong>0.82ms avg</strong></div>
-                      <div>🛡️ Security: <strong>SOC-2 Compliant</strong></div>
-                      <div>🔄 Uptime: <strong>99.997% audited</strong></div>
-                      <div>⭐ Integrity: <strong>Signed verification key</strong></div>
-                    </div>
-                  </div>
-                )}
-
-                {selectedAd.persona.id === "roi" && (
-                  <RoiCalculatorSandbox />
-                )}
-
-                {selectedAd.persona.id === "trendy" && (
-                  <div style={{
-                    background: T.panel, borderRadius: 10, padding: 16,
-                    border: `1px solid ${T.border}`, display: "flex", flexDirection: "column", gap: 8
-                  }}>
-                    <strong style={{ color: T.orange, fontSize: 12 }}>🔥 Social Proof Live Tracker:</strong>
-                    <div style={{ fontSize: 12, color: T.text }}>
-                      Join <strong>12,410</strong> engineers who migrated from legacy tools this week.
-                    </div>
-                    <div style={{ display: "flex", gap: 6, fontSize: 10, color: T.soft }}>
-                      <span>🟢 Just joined: Alex (Stripe)</span>
-                      <span>🟢 Just joined: Jessica (Vercel)</span>
-                    </div>
-                  </div>
-                )}
-
-                {selectedAd.persona.id === "risk" && (
-                  <div style={{
-                    background: `${T.green}11`, border: `1px solid ${T.green}44`,
-                    borderRadius: 10, padding: 16, display: "flex", alignItems: "center", gap: 12
-                  }}>
-                    <span style={{ fontSize: 32 }}>🛡️</span>
-                    <div>
-                      <strong style={{ color: T.green, fontSize: 13, display: "block" }}>Double Satisfaction Guarantee</strong>
-                      <span style={{ fontSize: 12, color: T.text }}>
-                        If you don't save at least 20% of meeting overhead in 30 days, we'll refund 100% of your payment AND let you keep the templates.
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div style={{ display: "flex", gap: 12 }}>
-                <button 
-                  onClick={() => setSelectedAd(null)}
-                  style={{
-                    flex: 1, padding: "14px 24px", borderRadius: 12,
-                    background: `linear-gradient(135deg, ${selectedAd.persona.color}, ${selectedAd.persona.color}BB)`,
-                    border: "none", color: "#fff", fontWeight: 800, fontSize: 14, cursor: "pointer",
-                    boxShadow: `0 8px 24px ${selectedAd.persona.color}33`, textAlign: "center"
-                  }}
-                >
-                  Confirm Simulated Conversion (Get Started)
-                </button>
+            <div style={{ padding: 28, display: "flex", flexDirection: "column", gap: 20 }}>
+              <div style={{ background: T.void, border: `1px solid ${T.border}`, borderRadius: 6, padding: 20, display: "flex", flexDirection: "column", gap: 14 }}>
+                <h3 style={{ margin: 0, color: T.accent, fontSize: 18, fontWeight: 800 }}>{selectedAd.copy.headline}</h3>
+                {selectedAd.copy.subheadline && <p style={{ margin: 0, color: T.ink, fontSize: 13, fontWeight: 700 }}>{selectedAd.copy.subheadline}</p>}
+                <p style={{ margin: 0, color: T.text, fontSize: 13, lineHeight: 1.6 }}>{selectedAd.copy.body}</p>
+                {selectedAd.persona.id === "roi" && <RoiCalculatorSandbox />}
               </div>
             </div>
           </div>
