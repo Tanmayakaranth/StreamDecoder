@@ -17,4 +17,13 @@ class InterventionPayload(BaseModel):
     identity: Optional[dict] = None
 
 class GenerateRequest(BaseModel):
-    product: str
+    product: str
+
+class OutreachRequest(BaseModel):
+    customer_name: str
+    product_desc: str
+    primary_label: str
+    primary_desc: str
+    secondary_label: str
+    secondary_desc: str
+

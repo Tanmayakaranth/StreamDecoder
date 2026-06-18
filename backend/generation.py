@@ -519,8 +519,12 @@ def call_gemini_for_persona(product: str, persona_id: str, api_key: str) -> dict
                 "text": f"Product Description: {product}\n\nGenerate the ad copy variations for this product."
             }]
         }],
+        "systemInstruction": {
+            "parts": [{
+                "text": system_instruction
+            }]
+        },
         "generationConfig": {
-            "systemInstruction": system_instruction,
             "responseMimeType": "application/json"
         }
     }
@@ -543,6 +547,10 @@ def call_gemini_for_persona(product: str, persona_id: str, api_key: str) -> dict
             # Clean possible markdown wrap
             clean_json = raw_text.replace("```json", "").replace("```", "").strip()
             return json.loads(clean_json)
+    except urllib.error.HTTPError as e:
+        error_body = e.read().decode("utf-8")
+        print(f"[Gemini API backend HTTP error for {persona_id}] Code {e.code}: {error_body}")
+        raise e
     except Exception as e:
         print(f"[Gemini API backend error for {persona_id}]: {e}")
         raise e
@@ -588,3 +596,121 @@ def generate_all_persona_copies(product: str) -> dict:
             results[p_id] = fallbacks[p_id]
 
     return results
+
+# ─── B2B OUTREACH GENERATION ──────────────────────────────────────────────────
+def get_outreach_fallback(customer_name: str, product_desc: str, primary_label: str, primary_desc: str, secondary_label: str, secondary_desc: str) -> str:
+    desc = product_desc.strip() if product_desc else "our structural pipeline optimization layer"
+    lower_desc = desc.lower()
+
+    # Extract short product name
+    short_product = desc
+    match = re.search(
+        r"^([A-Za-z0-9\s'-]{3,30})(?:\s+(?:is|that|uses|helps|automates|allows|delivers|built for))\b",
+        desc,
+        re.IGNORECASE
+    )
+    if match:
+        short_product = match.group(1).strip()
+    elif len(desc.split()) > 3:
+        short_product = " ".join(desc.split()[:3])
+    
+    short_product = short_product[0].upper() + short_product[1:] if short_product else ""
+
+    # Classify category
+    category = "general"
+    if re.search(r"coffee|food|cafe|restaurant|drink|bake|cook|chef|menu|tea|barista|dine|dining|kitchen", lower_desc):
+        category = "food"
+    elif re.search(r"gym|fitness|health|workout|run|diet|doctor|med|exercise|body|train|yoga|wellness", lower_desc):
+        category = "health"
+    elif re.search(r"shop|buy|store|commerce|sell|product|clothes|shoe|market|retail|apparel|boutique", lower_desc):
+        category = "shop"
+    elif re.search(r"app|software|saas|tool|manage|prioritize|meeting|code|api|dev|database|platform|task", lower_desc):
+        category = "saas"
+
+    cust = customer_name or "there"
+
+    templates = {
+        "food": (
+            f"Hi {cust},\n\n"
+            f"I wanted to reach out because we've been helping culinary teams elevate their operations with {short_product}. "
+            f"Given your focus matches an explicit need for {primary_label} ({primary_desc}) alongside {secondary_label} ({secondary_desc}), "
+            f"our fresh, artisanal approach is a perfect fit to drive higher customer engagement.\n\n"
+            f"Let's coordinate a brief sync next week to see how we can optimize your menu offerings.\n\n"
+            f"Best,\n{short_product} Growth Team"
+        ),
+        "health": (
+            f"Hi {cust},\n\n"
+            f"I hope you're doing well. At {short_product}, we focus on high-yield biometric wellness and structural optimizations. "
+            f"We noticed your target profile aligns with {primary_label} ({primary_desc}) alongside the flexibility of {secondary_label} ({secondary_desc}).\n\n"
+            f"Our system is specifically built to match these goals and maximize physical and metrics criteria. Let's sync this week.\n\n"
+            f"Best,\n{short_product} Wellness Engine"
+        ),
+        "shop": (
+            f"Hi {cust},\n\n"
+            f"I wanted to share how leading brands are scaling their commerce operations using {short_product}. "
+            f"Given your target profile focuses on {primary_label} ({primary_desc}) and requires a strong alignment to {secondary_label} ({secondary_desc}), "
+            f"our premium direct-value catalog is uniquely built to optimize your conversions.\n\n"
+            f"Let's set up a brief time to walk through the collection.\n\n"
+            f"Best,\n{short_product} Commerce Group"
+        ),
+        "saas": (
+            f"Hi {cust},\n\n"
+            f"I noticed your engineering team is working with unoptimized layers. At {short_product}, we automate software workflows. "
+            f"Our platform is ideal for teams who prioritize verified metrics for {primary_label} ({primary_desc}) and require {secondary_label} ({secondary_desc}) specifications.\n\n"
+            f"Let's coordinate a brief sync next week to see how we can optimize your event loop and dispatch latency.\n\n"
+            f"Best,\n{short_product} Operations Hub"
+        ),
+        "general": (
+            f"Hi {cust},\n\n"
+            f"I'm reaching out because we help teams optimize their workflows using {short_product}. "
+            f"Given your focus on {primary_label} ({primary_desc}) and {secondary_label} ({secondary_desc}), "
+            f"our platform offers the ideal combination of performance and utility for your needs.\n\n"
+            f"Let's connect for 10 minutes to review a tailored baseline sync check this week.\n\n"
+            f"Best,\n{short_product} Growth Team"
+        )
+    }
+
+    return templates[category]
+
+def generate_outreach_message(customer_name: str, product_desc: str, primary_label: str, primary_desc: str, secondary_label: str, secondary_desc: str) -> str:
+    api_key = load_api_key()
+    if not api_key:
+        print("[Backend Outreach] No Gemini API key detected. Returning fallback.")
+        return get_outreach_fallback(customer_name, product_desc, primary_label, primary_desc, secondary_label, secondary_desc)
+
+    prompt = (
+        f"You are an elite B2B growth marketer. Write a hyper-personalized outreach message for a lead named '{customer_name or 'Prospect'}'. \n"
+        f"Product Capability Context: '{product_desc or 'our structural pipeline optimization layer'}'.\n"
+        f"The user has been classified into two buyer personas simultaneously:\n"
+        f"1. Primary Focus: '{primary_label}' ({primary_desc})\n"
+        f"2. Supporting Secondary Focus: '{secondary_label}' ({secondary_desc})\n"
+        f"Combine the messaging triggers seamlessly. Keep the output professional, crisp, tactical, and directly applicable. Do not use boilerplate intro text or summary wrap-ups. Write strictly the finalized outreach text context under 160 words."
+    )
+
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+    payload = {
+        "contents": [{ "parts": [{ "text": prompt }] }]
+    }
+
+    req_data = json.dumps(payload).encode("utf-8")
+    req = urllib.request.Request(
+        url,
+        data=req_data,
+        headers={"Content-Type": "application/json"},
+        method="POST"
+    )
+
+    try:
+        with urllib.request.urlopen(req, timeout=10) as response:
+            res_data = response.read().decode("utf-8")
+            data = json.loads(res_data)
+            return data["candidates"][0]["content"]["parts"][0]["text"]
+    except urllib.error.HTTPError as e:
+        error_body = e.read().decode("utf-8")
+        print(f"[Backend Outreach API HTTP Error] Code {e.code}: {error_body}. Returning fallback.")
+        return get_outreach_fallback(customer_name, product_desc, primary_label, primary_desc, secondary_label, secondary_desc)
+    except Exception as e:
+        print(f"[Backend Outreach API Error]: {e}. Returning fallback.")
+        return get_outreach_fallback(customer_name, product_desc, primary_label, primary_desc, secondary_label, secondary_desc)
+
+
